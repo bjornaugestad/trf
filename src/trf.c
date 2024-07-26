@@ -302,11 +302,7 @@ char *GetNamePartAddress(char *name)
     int i;
     char *pname;
 
-#if defined(UNIXCONSOLE)||defined(UNIXGUI)
     char dirsymbol = '/';
-#elif defined(WINDOWSCONSOLE)||defined(WINDOWSGUI)
-    char dirsymbol = '\\';
-#endif
 
     i = strlen(name) - 1;
     pname = &name[i];

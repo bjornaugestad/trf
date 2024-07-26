@@ -44,13 +44,6 @@ License along with TRF.  If not, see <https://www.gnu.org/licenses/>.
 #include <stdlib.h>
 #include <errno.h>
 
-/* Added by Yozen to explicitly include header for windows GUI definitons on Jan 25, 2016 */
-#ifdef WINDOWSGUI
-#include <windows.h>
-#include <windef.h>
-#include <winuser.h>
-#endif
-
 /* These declarations moved by Yevgeniy Gelfand on Jan 27, 2010  */
 
 /* To have smaller sequences not send results */
@@ -740,7 +733,7 @@ void TRF(FASTASEQUENCE *pseq)
 
     /* over allocate statistics_distance array to prevent spill in alignments
      * with execive insertion counts Jan 07, 2003 */
-    Statistics_Distance = (int *)calloc(4 * MAXDISTANCE, sizeof(int));
+    Statistics_Distance = calloc(4 * MAXDISTANCE, sizeof *Statistics_Distance);
     if (Statistics_Distance == NULL) {
         PrintError("Unable to allocate memory for Statistics_Distance array");
         exit(-3);
@@ -770,22 +763,25 @@ void TRF(FASTASEQUENCE *pseq)
     /* following four memory allocations increased to avoid memory error when
      * consensus length exceeds MAXDISTANCE after returning from get_consensus(d) */
 
-    Criteria_count = (int *)calloc(2 * (MAXDISTANCE + 1), sizeof(int));
+    Criteria_count = calloc(2 * (MAXDISTANCE + 1), sizeof *Criteria_count);
     if (Criteria_count == NULL) {
         PrintError("Unable to allocate Criteria_count");
         exit(-4);
     }
-    Consensus_count = (int *)calloc(2 * (MAXDISTANCE + 1), sizeof(int));
+
+    Consensus_count = calloc(2 * (MAXDISTANCE + 1), sizeof *Consensus_count);
     if (Consensus_count == NULL) {
         PrintError("Unable to allocate memory for Consensus_count");
         exit(-5);
     }
-    Cell_count = (double *)calloc(2 * (MAXDISTANCE + 1), sizeof(double));
+
+    Cell_count = calloc(2 * (MAXDISTANCE + 1), sizeof *Cell_count);
     if (Cell_count == NULL) {
         PrintError("Unable to allocate memory for Cell_count");
         exit(-6);
     }
-    Outputsize_count = (int *)calloc(2 * (MAXDISTANCE + 1), sizeof(int));
+
+    Outputsize_count = calloc(2 * (MAXDISTANCE + 1), sizeof *Outputsize_count);
     if (Outputsize_count == NULL) {
         PrintError("Unable to allocate memory for Outputsize_count");
         exit(-7);
@@ -882,71 +878,26 @@ void TRF(FASTASEQUENCE *pseq)
 void PrintError(char *errortext)
 {
     /* the code here depends on the environment defined above */
-#if defined(WINDOWSGUI)
-    MessageBox((HWND) paramset.guihandle, errortext, "TRF", MB_ICONERROR | MB_OK);
-#elif defined(WINDOWSCONSOLE)
     fprintf(stderr, "Error: %s\n", errortext);
-#elif defined(UNIXGUI)
-    unix_gui_error("Error: %s\n", errortext);
-#elif defined(UNIXCONSOLE)
-    fprintf(stderr, "Error: %s\n", errortext);
-#endif
-
-    return;
 }
 
 void PrintProgress(char *progresstext)
 {
-    /* platform dependent code */
-#if defined(WINDOWSGUI)
-    /* send message to status bar */
-    SendDlgItemMessage((HWND) paramset.guihandle, IDC_STATUSBAR, SB_SETTEXT, (WPARAM) 0, (LPARAM) progresstext);
-    SendDlgItemMessage((HWND) paramset.guihandle, IDC_STATUSBAR, WM_PAINT, (WPARAM) 0, (LPARAM) 0);
-#elif defined(WINDOWSCONSOLE)
     fprintf(stderr, "\n%s", progresstext);
-#elif defined(UNIXGUI)
-    print_progress("\n%s", progresstext);
-#elif defined(UNIXCONSOLE)
-    fprintf(stderr, "\n%s", progresstext);
-#endif
-
-    return;
 }
 
 void SetProgressBar(void)
 {
     static int ready = 0;
 
-#if defined(WINDOWSGUI)
-    static HWND barhwnd;
-    static HDC hdc;
-    static RECT rect, rect2;
-    static char buffer[100];
-#elif defined(WINDOWSCONSOLE)
-
-#elif defined(UNIXGUI)
-
-#elif defined(UNIXCONSOLE)
-
-#endif
-
     /* if percent is minus one then un-ready the progress indicator */
     if (paramset.percent < 0) {
         if (!ready)
             return;
+
         ready = 0;
         /* hide the progress indicator */
-#if defined(WINDOWSGUI)
-        InvalidateRect(barhwnd, NULL, TRUE);
-        ReleaseDC(barhwnd, hdc);
-#elif defined(WINDOWSCONSOLE)
         putchar('\n');
-#elif defined(UNIXGUI)
-        set_progress_bar(0.0);
-#elif defined(UNIXCONSOLE)
-        putchar('\n');
-#endif
-
         return;
     }
 
@@ -955,52 +906,15 @@ void SetProgressBar(void)
         ready = 1;
 
         /* position the progress progress indicator */
-#if defined(WINDOWSGUI)
-        /* get the rectangle of the second part of status bar */
-        barhwnd = GetDlgItem((HWND) paramset.guihandle, IDC_STATUSBAR);
-        SendMessage(barhwnd, SB_GETRECT, (WPARAM) 1, (LPARAM) (LPRECT) & rect);
-        /* adjust for borders */
-        rect.left += 2;
-        rect.right -= 2;
-        rect.top += 2;
-        rect.bottom -= 2;
-        /* set up progress rectangle */
-        rect2 = rect;
-        rect2.right = rect2.left;
-
-        /* obtain a dc and draw on second panel */
-        hdc = GetDC(barhwnd);
-        FillRect(hdc, &rect, (HBRUSH) (COLOR_WINDOW + 1));
-        FillRect(hdc, &rect2, (HBRUSH) (COLOR_ACTIVECAPTION + 1));
-
-#elif defined(WINDOWSCONSOLE)
         putchar('\n');
-#elif defined(UNIXGUI)
-
-#elif defined(UNIXCONSOLE)
-        putchar('\n');
-#endif
     }
 
     /* set progress indicator to percent value */
     if (paramset.percent > 100)
         paramset.percent = 100;
 
-#if defined(WINDOWSGUI)
-    FillRect(hdc, &rect, (HBRUSH) (COLOR_WINDOW + 1));
-    rect2.right = rect2.left + (rect.right - rect.left) * paramset.percent / 100;
-    FillRect(hdc, &rect2, (HBRUSH) (COLOR_ACTIVECAPTION + 1));
-#elif defined(WINDOWSCONSOLE)
     if (!(paramset.percent % 5))
         putchar('.');
-#elif defined(UNIXGUI)
-    set_progress_bar(paramset.percent / 100.0);
-#elif defined(UNIXCONSOLE)
-    if (!(paramset.percent % 5))
-        putchar('.');
-#endif
-
-    return;
 }
 
 /*******************************************************
@@ -1018,6 +932,7 @@ int LoadSequenceFromFileBenson(FASTASEQUENCE *pseq, FILE *fp)
 
     // read the FASTA '>' symbol
     letter = getc(fp);
+    // TODO: test for EOF. boa@20240726
     if (letter != '>')
         return -1;              // invalid format
 

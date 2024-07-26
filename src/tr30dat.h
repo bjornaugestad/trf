@@ -36,30 +36,12 @@ int counterInSeq = 0;
 
 /* uncomment only one platform target identifier */
 
-//#define WINDOWSGUI
-//#define WINDOWSCONSOLE
 //#define UNIXCONSOLE
 //#define UNIXGUI
 
-/* make sure only one platform is defined */
-#if ( defined( WINDOWSGUI ) + defined( WINDOWSCONSOLE ) + defined( UNIXGUI ) + \
-      defined( UNIXCONSOLE ) ) > 1
-#error Only one Platform can be defined in tr30dat.h
-#endif
 
-/* make sure at least one platform is defined */
-// #if ( defined( WINDOWSGUI ) + defined( WINDOWSCONSOLE ) + defined( UNIXGUI ) + \
-//       defined( UNIXCONSOLE ) ) == 0
-// #pragma message( \
-//   "You forgot to define a platform when compiling. Setting UNIXCONSOLE." )
 #if __unix__
 #define UNIXCONSOLE
-#undef WINDOWSGUI
-#undef WINDOWSCONSOLE
-#elif _WIN32
-#define WINDOWSCONSOLE
-#undef UNIXCONSOLE
-#undef UNIXGUI
 #endif
 
 #ifdef UNIXCONSOLE
@@ -67,12 +49,11 @@ int counterInSeq = 0;
 #elif defined( UNIXGUI )
 
 /* it is possible to do a windows GTK+ version */
-#if !defined( _WIN32 )
+// TODO: fix these very short lengths. boa@20240726
 #define _MAX_PATH 260           /* max. length of full pathname */
 #define _MAX_DIR 260            /* max. length of path component */
 #define _MAX_FNAME 260          /* max. length of file name component */
 #define _MAX_EXT 260            /* max. length of extension component */
-#endif
 
 #endif
 
@@ -91,8 +72,6 @@ int counterInSeq = 0;
 #else
 #define versionstring PACKAGE_VERSION
 #endif
-
-#define farcalloc calloc
 
 #ifndef UNIXGUI
 
@@ -165,9 +144,7 @@ unsigned int maxwraplength = 0;
 /* to disc to improve performance             */
 // int TempFilesToDisc = 0;
 
-#define MAXPATTERNSIZECONSTANT                    \
-    MAXDISTANCECONSTANT         /* replaced by a variable \
-                                 */
+#define MAXPATTERNSIZECONSTANT MAXDISTANCECONSTANT // replaced by a variable 
 #define DASH '-'
 #define BLANK ' '
 
@@ -176,50 +153,46 @@ unsigned int maxwraplength = 0;
 
 #define MULTIPLES 3             /* We keep MULTIPLES*d distance entries */
 #define FILLMULTIPLE 3
-#define LOWERENDMULTIPLE                     \
-    3                           /* how close the lower end of distance \
-                                 * indices has to be to the end of one copy */
+
+
+// how close the lower end of distance indices has to be to the end of one copy
+#define LOWERENDMULTIPLE 3
+
 #define ACCEPTED 1
 #define NOTACCEPTED 0
 
-#define SMALLDISTANCE 20        /* these are sizes for which we do a */
+// these are sizes for which we do a full array wraparound dynamic
+// programming and for which we set d_range by hand 
+#define SMALLDISTANCE 20        
 
-/* full array wraparound dynamic */
+/* minimum number of places to store a tuple match.  Usually this is the same
+ * as the distance, but for small distances, we allow more tuple matches 
+ * because we want see a significant number of matches */
+int Min_Distance_Entries = 20;  
 
-/* programming and for which we set d_range */
-
-/* by hand */
-
-int Min_Distance_Entries = 20;  /* minimum number of places to store a tuple
-                                 * match.  Usually this is the same as the
-                                 * distance, but for small distances, we
-                                 * allow more tuple matches because we want
-                                 * see a significant number of matches */
-
-int Min_Distance_Window = 20;   /* minimum size of distance window. */
-
+/* minimum size of distance window. */
 /* Usually this is the same as the */
-
 /* distance, but for small distances we */
-
 /* allow more space because we want a */
-
 /* significant number of matches */
+int Min_Distance_Window = 20;
 
-#define TAGSEP 50               /* index separation for tags table for linking */
 
-/* active distances for distance range addition of */
+// index separation for tags table for linking 
+// active distances for distance range addition of 
+// matches 
+#define TAGSEP 50
 
-/* matches */
 int PM;
 int PI;
-double Pindel;                  /* expected probability of a single character indel in
-                                 * the worst case tandem repeat. Pindel should be tied
-                                 * to the indel cost parameter */
+
+/* expected probability of a single character indel in the worst case tandem
+ * repeat. Pindel should be tied to the indel cost parameter */
+double Pindel;
 
 int MAXDISTANCE = 500;
 int MAXPATTERNSIZE = 500;
-/* */ char debugbuffer[500];
+char debugbuffer[500];
 
 /* G. Benson 1/28/2004 */
 
@@ -465,31 +438,14 @@ int four_to_the[] = {
     1, 4, 16, 64, 256, 1024, 4096, 16384, 65536, 262144, 1048576
 };
 
-/* #define Number_tuple_sizes  4 */
+/* number of different tuple sizes to use; preset for all distances */
+int NTS;
 
-/* #define Number_tuple_sizes  4 */
+/* int Tuplesize[NTS+1]={0,2,3,5,7};*//* what the different sizes are */
 
-int NTS;                        /* number of different tuple sizes to use;
-                                 * preset for all distances */
-
-                                       /* int Tuplesize[NTS+1]={0,2,3,5,7};*//* what the different sizes are */
-
-                                       /* int Tuplesize[NTS+1]={0,4,5,6,7};*//* what the different sizes are */
-
-/* int Tuplesize[NTS+1]={0,3,4,5,7};*/
 int Tuplesize[MAXTUPLESIZES + 1];
 int Tuplemaxdistance[MAXTUPLESIZES + 1];
 
-                                                                      /* int Tuplemaxdistance[MAXTUPLESIZES+1]={0,30,80,200,MAXDISTANCE};*//* upper
-                                                                       * distance
-                                                                       * for
-                                                                       * each
-                                                                       * tuplesize
-                                                                       */
-
-/* int Tuplemaxdistance[MAXTUPLESIZES+1]={0,29,83,159,MAXDISTANCE};*/
-
-/* int Tuplemaxdistance[MAXTUPLESIZES+1]={0,29,159,MAXDISTANCE};*/
 int Tuplecode[MAXTUPLESIZES + 1];   /* this is where the actual tuple codes
                                      * encountered at a sequence location
                                      * are stored. */
@@ -514,14 +470,10 @@ int Criteria_print = 0;
 int Meet_criteria_print = 0;
 int *Sortmultiples;
 
-                                 /* define NUMBER_OF_PERIODS 3 *//* returns <= 3 best periods for a repeat */
-
 /* modified 3/25/05 G. Benson */
-#define NUMBER_OF_PERIODS 5     /* determines 5 best periods for a repeat */
-#define NUMBER_OF_PERIODS_TO_TEST \
-    3                           /* only test 3 best periods for multiples test */
-#define NUMBER_OF_PERIODS_INTO_SORTMULTIPLES \
-    5                           /* added 5/25/05 for compatibility with bestperiodslist */
+#define NUMBER_OF_PERIODS 5                    /* determines 5 best periods for a repeat */
+#define NUMBER_OF_PERIODS_TO_TEST 3            /* only test 3 best periods for multiples test */
+#define NUMBER_OF_PERIODS_INTO_SORTMULTIPLES 5 /* added 5/25/05 for compatibility with bestperiodslist */
 
 struct MDDtype {
     int distance;
@@ -565,7 +517,6 @@ typedef struct {
 
 void trf_message(char *format, ...)
 {
-
     va_list argp;
 
     if (format == NULL)

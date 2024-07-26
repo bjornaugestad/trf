@@ -720,19 +720,8 @@ void OutputHTML(IL *headptr, char *tablefile, char *alignmentfile)
         /*print help lines */
         fprintf(fp, "<PRE>\nClick on indices to view alignment\n");
 
-#if defined(WINDOWSGUI)
-        fprintf(fp,
-            "</PRE><P>See <FONT COLOR=\"#0000FF\">Table Explanation</FONT> in Tandem Repeats Finder Help</P><BR>\n");
-#elif defined(WINDOWSCONSOLE)
         fprintf(fp,
             "</PRE><A HREF=\"http://tandem.bu.edu/trf/trf.definitions.html#table\" target = \"explanation\">Table Explanation</A><BR><BR>\n");
-#elif defined(UNIXGUI)
-        fprintf(fp,
-            "</PRE><P>See <FONT COLOR=\"#0000FF\">Table Explanation</FONT> in Tandem Repeats Finder Help</P><BR>\n");
-#elif defined(UNIXCONSOLE)
-        fprintf(fp,
-            "</PRE><A HREF=\"http://tandem.bu.edu/trf/trf.definitions.html#table\" target = \"explanation\">Table Explanation</A><BR><BR>\n");
-#endif
 
         /* print beginning of table */
         fprintf(fp, "<TABLE BORDER=1 CELLSPACING=0 CELLPADDING=0>\n");
@@ -773,6 +762,7 @@ void OutputHTML(IL *headptr, char *tablefile, char *alignmentfile)
             else {
                 fprintf(fp, "%d   ", j);
             }
+
             if (j % 16 == 0 && j < nfiles)
                 fprintf(fp, "\n          ");
         }
@@ -784,8 +774,6 @@ void OutputHTML(IL *headptr, char *tablefile, char *alignmentfile)
         fprintf(fp, "\n</BODY></HTML>\n");
         fclose(fp);
     }
-
-    return;
 }
 
 void OutputHeading(FILE *fp, char *tablefile, char *alignmentfile)
@@ -821,19 +809,23 @@ void MakeDataFile(IL *headptr, char *datafile, int data)
 
         if (paramset.ngs != 1) {
             fprintf(fp,
-                "Tandem Repeats Finder Program writen by:\n\nGary Benson\nProgram in Bioinformatics\nBoston University\nVersion %s\n\n\n%s\n\n\n%s\n\n",
+                "Tandem Repeats Finder Program written by:\n\nGary Benson\nProgram in Bioinformatics\nBoston University\nVersion %s\n\n\n%s\n\n\n%s\n\n",
                 versionstring, hsequence, hparameters);
         }
+
         for (lpointer = headptr; lpointer != NULL; lpointer = lpointer->next) {
             fprintf(fp, "%d %d %d %.1f %d %d %d %d %d %d %d %d %.2f %s ",
                 lpointer->first, lpointer->last, lpointer->period,
                 lpointer->copies, lpointer->size, lpointer->matches,
                 lpointer->indels, lpointer->score, lpointer->acount,
                 lpointer->ccount, lpointer->gcount, lpointer->tcount, lpointer->entropy, lpointer->pattern);
+
             for (charcount = lpointer->first; charcount <= lpointer->last; charcount++)
                 fprintf(fp, "%c", Sequence[charcount]);
+
             fprintf(fp, "\n");
         }
+
         fclose(fp);
     }
     else

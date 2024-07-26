@@ -19,11 +19,9 @@ You should have received a copy of the GNU Affero General Public
 License along with TRF.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef TR30DAT_C
-#define TR30DAT_C
-
-#include <stdlib.h>             /* has calloc definition */
+#include <stdlib.h>
 #include <math.h>
+
 #include "tr30dat.h"
 
 /* March 3,1999 removed main to replace with OnStartSearch() . AR */
@@ -48,23 +46,16 @@ License along with TRF.  If not, see <https://www.gnu.org/licenses/>.
 }
 new1Darrayfunc(char, newAlignPairtext, length)
 new1Darrayfunc(char, newLine, length)
-new1Darrayfunc(int, newAlignPairindex, length) new1Darrayfunc(int, newTags, length)
+new1Darrayfunc(int, newAlignPairindex, length)
+new1Darrayfunc(int, newTags, length)
 
-    /*******************************************************************/
 int d_range(int d)
 {
     return ((int)floor(2.3 * sqrt(Pindel * d)));
 }
 
 /* Jan 27, 2006, Gelfand, changed to use Similarity Matrix to avoid N matching itself */
-
 /* This function may be called multiple times (for different match/mismatch scores) */
-
-/*******************************************************************/
-
-/**************************    init_sm()   *************************/
-
-/*******************************************************************/
 void init_sm(int match, int mismatch)
 {
     static int sm_allocated = 0;
@@ -72,7 +63,7 @@ void init_sm(int match, int mismatch)
 
     /* SM has 256*w56 entries to map MATCH-MISMATCH matrix */
     if (!sm_allocated) {
-        SM = (int *)calloc(256 * 256, sizeof(int));
+        SM = calloc(256 * 256, sizeof *SM);
         if (SM == NULL) {
             trf_message("\nInit_sm: Out of memory!");
             exit(-1);
@@ -93,33 +84,22 @@ void init_sm(int match, int mismatch)
     SM['T' * 256 + 'T'] = match;
 }
 
-/*******************************************************************/
-
-/**************************  init_index()  *************************/
-
-/*******************************************************************/
-
 void init_index()
 {
     /* index has 256 entries so that finding the entries for A, C, G and T */
     /* require no calculation */
 
-    Index = (int *)calloc(256, sizeof(int));
+    Index = calloc(256, sizeof *Index);
     if (Index == NULL) {
         trf_message("\nInit_index: Out of memory!");
         exit(-1);
     }
+
     Index['A'] = 0;
     Index['C'] = 1;
     Index['G'] = 2;
     Index['T'] = 3;
 }
-
-/*******************************************************************/
-
-/***************************** narrowbandwrap()  macros **************************/
-
-/*******************************************************************/
 
 /* *pcurr>=maxscore added 2.17.05 gary benson -- to extend alignment as far as possible */
 #define test_trace_and_backwards_maxscore \
@@ -131,8 +111,8 @@ if (*pcurr>=maxscore)\
     maxscore=*pcurr;\
     minrealrow=realr;\
     mincol=c;\
-    /***6/9/05 G. Benson***/ mincolbandcenter=Bandcenter[r];\
-    /*** 6/14/05 G. Benson ***/ mincolposition=i;\
+    mincolbandcenter=Bandcenter[r];\
+    mincolposition=i;\
 }
 
 #define test_maxrowscore_with_match \
@@ -161,18 +141,10 @@ if (*pcurr>=maxscore)\
     maxcol=c;\
 }
 
-/*******************************************************************/
-
-/***************************** narrowbandwrap()  **************************/
-
-/*******************************************************************/
-void narrowbandwrap(int start, int size, int bandradius, int bandradiusforward, int option, int tuplesize)
-
 /* start is end of pattern in text */
-
 /* tuplesize is the size of tuple used for this pattern size */
-
 /* started Feb. 7 1997 */
+void narrowbandwrap(int start, int size, int bandradius, int bandradiusforward, int option, int tuplesize)
 {
     int g;
     register int *pup, *pdiag, *pcurr, pleft;
@@ -181,20 +153,8 @@ void narrowbandwrap(int start, int size, int bandradius, int bandradiusforward, 
     char currchar;
     int w, matches_in_diagonal, matchatmax_col, i, k, maxrowscore, lastmatchatmax_col, match_yes_no;
 
-    /*** 6/9/05 G. Benson ***/
     int mincolbandcenter, zeroat, mincolposition;
-
-    /* Feb 16, 2016 Yozen */
     unsigned int r;
-
-    /* G. Benson */
-    /* 1/26/10 */
-    /* change MAXWRAPLENGTH to MAXWRAPLENGTHCONST so MAXWRAPLENGTH can be used as an int */
-    /* int Bandcenter[MAXWRAPLENGTH+1]; */
-    // if (Bandcenter == NULL) {
-    //  Bandcenter = calloc(maxwraplength+1, sizeof(*Bandcenter));
-    // }
-    /* Bandcenter init removed by Yozen on Feb 16, 2016. */
 
     w = bandradius;
     if (MAXBANDWIDTH < 2 * w + 1) {
@@ -243,7 +203,7 @@ void narrowbandwrap(int start, int size, int bandradius, int bandradiusforward, 
     /* backwards */
 
     end_of_trace = FALSE;
-    while ((!end_of_trace) && (realr > 1) && (r > 0)) {
+    while (!end_of_trace && realr > 1 && r > 0) {
         r--;
         realr--;
         Rows++;
@@ -259,17 +219,15 @@ void narrowbandwrap(int start, int size, int bandradius, int bandradiusforward, 
             Bandcenter[r] = (matchatmax_col - 1 + size) % size;
         }
         else {
-
             /* don't recenter */
             Bandcenter[r] = (Bandcenter[r + 1] - 1 + size) % size;
         }
 
-        /* change of bandcenter determines which inputs go into which
-         * cells */
-
+        /* change of bandcenter determines which inputs go into which cells */
         k = (Bandcenter[r] - Bandcenter[r + 1] + size) % size;
         if (size - k <= k)
             k = -(size - k);
+
         c = (Bandcenter[r] + w) % size;
         if (k <= -1) {          /* band shifts left */
             k = -k;
@@ -285,6 +243,7 @@ void narrowbandwrap(int start, int size, int bandradius, int bandradiusforward, 
                 pup--;
                 c = (c - 1 + size) % size;
             }
+
             i = k - 1;
             *pdiag += (match_yes_no = match(currchar, EC[c]));
             pleft = (*pcurr = max3(0, *pdiag, pleft)) + Delta;
@@ -303,6 +262,7 @@ void narrowbandwrap(int start, int size, int bandradius, int bandradiusforward, 
         else {                  /* band shifts right */
             pdiag = &Diag[2 * w];
             pup = &Up[2 * w];
+
             for (i = 2 * w; i >= 2 * w - k + 1; i--) {
                 pleft = (*pcurr = max2(0, pleft)) + Delta;
                 test_trace_and_backwards_maxscore;
@@ -310,6 +270,7 @@ void narrowbandwrap(int start, int size, int bandradius, int bandradiusforward, 
                 pcurr--;
                 c = (c - 1 + size) % size;
             }
+
             i = 2 * w - k;
             pleft = (*pcurr = max3(0, *pup, pleft)) + Delta;
             test_trace_and_backwards_maxscore;
@@ -317,6 +278,7 @@ void narrowbandwrap(int start, int size, int bandradius, int bandradiusforward, 
             pcurr--;
             pup--;
             c = (c - 1 + size) % size;
+
             for (i = 2 * w - k - 1; i >= 0; i--) {
                 *pdiag += (match_yes_no = match(currchar, EC[c]));
                 pleft = (*pcurr = max4(0, *pdiag, *pup, pleft)) + Delta;
@@ -328,9 +290,11 @@ void narrowbandwrap(int start, int size, int bandradius, int bandradiusforward, 
                 c = (c - 1 + size) % size;
             }
         }
+
         pcurr = &S[r][0];
         pdiag = &Diag[0];
         pup = &Up[0];
+
         for (i = 0; i <= 2 * w; i++) {
             *pup = (*pdiag = *pcurr) + Delta;
             pcurr++;
@@ -343,222 +307,184 @@ void narrowbandwrap(int start, int size, int bandradius, int bandradiusforward, 
             matches_in_diagonal = 0;
     }
 
-    /**********************************************************************/
-
-    /**********************************************************************/
-
-    /**********************************************************************/
-
-    /**********************************************************************/
-
     /* forward */
 
-    if (ldong == 1)             /* null statement */
-        ;
-    else {
+    if (ldong == 1)
+        return;
 
-        r = 0;
-        realr = minrealrow - 1;
-        /* mincol matches minrealrow in previous alignment above */
+    r = 0;
+    realr = minrealrow - 1;
+    /* mincol matches minrealrow in previous alignment above */
 
-        /*** 6/14/05 G. Benson ***/
-        /* modification version g */
-        Bandcenter[0] = (mincolbandcenter - 1 + size) % size;
-        matches_in_diagonal = 0;
-        matchatmax_col = -2;
-        maxscore = 0;
-        pup = &Up[0];
-        pdiag = &Diag[0];
-        pcurr = &S[0][0];
+    /*** 6/14/05 G. Benson ***/
+    /* modification version g */
+    Bandcenter[0] = (mincolbandcenter - 1 + size) % size;
+    matches_in_diagonal = 0;
+    matchatmax_col = -2;
+    maxscore = 0;
+    pup = &Up[0];
+    pdiag = &Diag[0];
+    pcurr = &S[0][0];
 
-        /* 3/14/05 gary benson -- forward direction */
-        /* change zeroth row values to put in -1000 in unreachable cells
-         * and gap penalty in cells beyond start location */
+    /* 3/14/05 gary benson -- forward direction */
+    /* change zeroth row values to put in -1000 in unreachable cells
+     * and gap penalty in cells beyond start location */
 
-        /* initialize top row */
+    /* initialize top row */
 
-        /*** 6/14/05 G. Benson ***/
-        /* set zero at mincol, not at bandcenter, which is now mincolbandcenter,
-         * so that forward alignment starts out the same as backwards alignment ended. */
-        zeroat = mincolposition - w;
+    /*** 6/14/05 G. Benson ***/
+    /* set zero at mincol, not at bandcenter, which is now mincolbandcenter,
+     * so that forward alignment starts out the same as backwards alignment ended. */
+    zeroat = mincolposition - w;
 
-        /* July 9, 20009, G. Benson */
-        /* widening the narrowband in the forward direction to catch alignments that don't return to correct start column */
-        w = bandradiusforward;
+    /* July 9, 20009, G. Benson */
+    /* widening the narrowband in the forward direction to catch alignments that don't return to correct start column */
+    w = bandradiusforward;
 
-        if (MAXBANDWIDTH < 2 * w + 1) {
-            trf_message("\nIn narrowbandwrap, MAXBANDWIDTH: %d exceeded by bandradiusforward 2*w+1: %d\n",
-                MAXBANDWIDTH, 2 * w + 1);
-            exit(-1);
-        }
+    if (MAXBANDWIDTH < 2 * w + 1) {
+        trf_message("\nIn narrowbandwrap, MAXBANDWIDTH: %d exceeded by bandradiusforward 2*w+1: %d\n",
+            MAXBANDWIDTH, 2 * w + 1);
+        exit(-1);
+    }
 
-        //  if((zeroat>w)||(zeroat<-w)) fprintf(stderr,"\nfound zeroat out of bounds");
+    /*** 6/14/05 G. Benson restore what was in all earlier versions ***/
+    for (i = 0; i < w + zeroat; i++) {
+        *pup = (*pdiag = (*pcurr = -1000)) + Delta;
+        pup++;
+        pdiag++;
+        pcurr++;
+    }
 
-        /*** 6/14/05 G. Benson restore what was in all earlier versions ***/
-        for (i = 0; i < w + zeroat; i++) {
-            *pup = (*pdiag = (*pcurr = -1000)) + Delta;
-            pup++;
-            pdiag++;
-            pcurr++;
-        }
+    /*** 6/9/05 G. Benson ***/
+    for (i = w + zeroat; i <= 2 * w; i++) {
 
         /*** 6/9/05 G. Benson ***/
-        for (i = w + zeroat; i <= 2 * w; i++) {
+        *pup = (*pdiag = (*pcurr = 0 + Delta * (i - (w + zeroat)))) + Delta;
+        pup++;
+        pdiag++;
+        pcurr++;
+    }
 
-            /*** 6/9/05 G. Benson ***/
-            *pup = (*pdiag = (*pcurr = 0 + Delta * (i - (w + zeroat)))) + Delta;
-            pup++;
-            pdiag++;
-            pcurr++;
+    /* compute until end of trace */
+    end_of_trace = FALSE;
+    while ((!end_of_trace) && (realr < Length) && (r < maxwraplength)) {
+        r++;
+        realr++;
+        Rows++;
+        end_of_trace = TRUE;
+        maxrowscore = -1;
+        lastmatchatmax_col = matchatmax_col;
+        currchar = Sequence[realr];
+        pcurr = &S[r][0];
+        pleft = -1000;      /* don't use pleft for first entry */
+
+        if (matches_in_diagonal >= tuplesize) {
+            /* recenter band */
+            Bandcenter[r] = (matchatmax_col + 1) % size;
+        }
+        else {
+            /* don't recenter */
+            Bandcenter[r] = (Bandcenter[r - 1] + 1) % size;
         }
 
-        /* compute until end of trace */
-        end_of_trace = FALSE;
-        while ((!end_of_trace) && (realr < Length) && (r < maxwraplength)) {
-            r++;
-            realr++;
-            Rows++;
-            end_of_trace = TRUE;
-            maxrowscore = -1;
-            lastmatchatmax_col = matchatmax_col;
-            currchar = Sequence[realr];
-            pcurr = &S[r][0];
-            pleft = -1000;      /* don't use pleft for first entry */
+        /* change of bandcenter determines which inputs go into which cells */
+        k = (Bandcenter[r] - Bandcenter[r - 1] + size) % size;
+        if (size - k <= k)
+            k = -(size - k);
 
-            if (matches_in_diagonal >= tuplesize) {
-                /* recenter band */
-                Bandcenter[r] = (matchatmax_col + 1) % size;
-            }
-            else {
-
-                /* don't recenter */
-                Bandcenter[r] = (Bandcenter[r - 1] + 1) % size;
-            }
-
-            /* change of bandcenter determines which inputs go into which
-             * cells */
-
-            k = (Bandcenter[r] - Bandcenter[r - 1] + size) % size;
-            if (size - k <= k)
-                k = -(size - k);
-            if (k >= 1) {       /* band shifts right */
-                pdiag = &Diag[k - 1];
-                pup = &Up[k];
-                c = (Bandcenter[r] - w + size) % size;
-                for (i = 0; i <= 2 * w - k; i++) {
-                    *pdiag += (match_yes_no = match(currchar, EC[c]));
-                    pleft = (*pcurr = max4(0, *pdiag, *pup, pleft)) + Delta;
-                    test_trace_and_forward_maxscore;
-                    test_maxrowscore_with_match;
-                    pcurr++;
-                    pdiag++;
-                    pup++;
-                    c = (c + 1) % size;
-                }
-                i = 2 * w - k + 1;
+        if (k >= 1) {       /* band shifts right */
+            pdiag = &Diag[k - 1];
+            pup = &Up[k];
+            c = (Bandcenter[r] - w + size) % size;
+            for (i = 0; i <= 2 * w - k; i++) {
                 *pdiag += (match_yes_no = match(currchar, EC[c]));
-                pleft = (*pcurr = max3(0, *pdiag, pleft)) + Delta;
+                pleft = (*pcurr = max4(0, *pdiag, *pup, pleft)) + Delta;
                 test_trace_and_forward_maxscore;
                 test_maxrowscore_with_match;
                 pcurr++;
+                pdiag++;
+                pup++;
                 c = (c + 1) % size;
-                for (i = 2 * w - k + 2; i <= 2 * w; i++) {
-                    pleft = (*pcurr = max2(0, pleft)) + Delta;
-                    test_trace_and_forward_maxscore;
-                    test_maxrowscore_without_match;
-                    pcurr++;
-                    c = (c + 1) % size;
-                }
             }
-            else {              /* band shifts left */
-                k = -k;
-                c = (Bandcenter[r] - w + size) % size;
-                pup = &Up[0];
-                pdiag = &Diag[0];
-                for (i = 0; i <= k - 1; i++) {
-                    pleft = (*pcurr = max2(0, pleft)) + Delta;
-                    test_trace_and_forward_maxscore;
-                    test_maxrowscore_without_match;
-                    pcurr++;
-                    c = (c + 1) % size;
-                }
-                i = k;
-                pleft = (*pcurr = max3(0, *pup, pleft)) + Delta;
+
+            i = 2 * w - k + 1;
+            *pdiag += (match_yes_no = match(currchar, EC[c]));
+            pleft = (*pcurr = max3(0, *pdiag, pleft)) + Delta;
+            test_trace_and_forward_maxscore;
+            test_maxrowscore_with_match;
+            pcurr++;
+            c = (c + 1) % size;
+            for (i = 2 * w - k + 2; i <= 2 * w; i++) {
+                pleft = (*pcurr = max2(0, pleft)) + Delta;
                 test_trace_and_forward_maxscore;
                 test_maxrowscore_without_match;
                 pcurr++;
-                pup++;
                 c = (c + 1) % size;
-                for (i = k + 1; i <= 2 * w; i++) {
-                    *pdiag += (match_yes_no = match(currchar, EC[c]));
-                    pleft = (*pcurr = max4(0, *pdiag, *pup, pleft)) + Delta;
-                    test_trace_and_forward_maxscore;
-                    test_maxrowscore_with_match;
-                    pcurr++;
-                    pdiag++;
-                    pup++;
-                    c = (c + 1) % size;
-                }
             }
-            pcurr = &S[r][0];
-            pdiag = &Diag[0];
+        }
+        else {              /* band shifts left */
+            k = -k;
+            c = (Bandcenter[r] - w + size) % size;
             pup = &Up[0];
-            for (i = 0; i <= 2 * w; i++) {
-                *pup = (*pdiag = *pcurr) + Delta;
+            pdiag = &Diag[0];
+            for (i = 0; i <= k - 1; i++) {
+                pleft = (*pcurr = max2(0, pleft)) + Delta;
+                test_trace_and_forward_maxscore;
+                test_maxrowscore_without_match;
+                pcurr++;
+                c = (c + 1) % size;
+            }
+
+            i = k;
+            pleft = (*pcurr = max3(0, *pup, pleft)) + Delta;
+            test_trace_and_forward_maxscore;
+            test_maxrowscore_without_match;
+            pcurr++;
+            pup++;
+            c = (c + 1) % size;
+            for (i = k + 1; i <= 2 * w; i++) {
+                *pdiag += (match_yes_no = match(currchar, EC[c]));
+                pleft = (*pcurr = max4(0, *pdiag, *pup, pleft)) + Delta;
+                test_trace_and_forward_maxscore;
+                test_maxrowscore_with_match;
                 pcurr++;
                 pdiag++;
                 pup++;
+                c = (c + 1) % size;
             }
-
-            if ((matchatmax_col - lastmatchatmax_col + size) % size == 1)
-                matches_in_diagonal++;
-            else
-                matches_in_diagonal = 0;
-        }
-        /* store last position scanned with this pattern */
-        Wrapend = realr;
-
-        if (Criteria_print)
-            trf_message("   DWPlength:%d", Wrapend - (minrealrow - 1) + 1);
-        /* test for report */
-        if (maxscore >= Reportmin) {
-            Maxrealrow = maxrealrow;
-            Maxrow = maxrow;
-            Maxcol = maxcol;
-            Maxscore = maxscore;
-
         }
 
+        pcurr = &S[r][0];
+        pdiag = &Diag[0];
+        pup = &Up[0];
+        for (i = 0; i <= 2 * w; i++) {
+            *pup = (*pdiag = *pcurr) + Delta;
+            pcurr++;
+            pdiag++;
+            pup++;
+        }
+
+        if ((matchatmax_col - lastmatchatmax_col + size) % size == 1)
+            matches_in_diagonal++;
+        else
+            matches_in_diagonal = 0;
     }
 
+    /* store last position scanned with this pattern */
+    Wrapend = realr;
+
+    if (Criteria_print)
+        trf_message("   DWPlength:%d", Wrapend - (minrealrow - 1) + 1);
+
+    /* test for report */
+    if (maxscore >= Reportmin) {
+        Maxrealrow = maxrealrow;
+        Maxrow = maxrow;
+        Maxcol = maxcol;
+        Maxscore = maxscore;
+    }
 }
 
-/*******************************************************************/
-
-/*******************************************************************/
-
-/***************************** globalnarrowbandwrap()  macros **************************/
-
-/*******************************************************************/
-
-#define global_test_maxrowscore_with_match \
-    if (*pcurr>maxrowscore)\
-{\
-    maxrowscore=*pcurr;\
-    if ((*pcurr==*pdiag)&&(match_yes_no==Alpha))\
-    matchatmax_col=c;\
-    else matchatmax_col=-2;\
-}
-
-#define global_test_maxrowscore_without_match \
-    if (*pcurr>maxrowscore)\
-matchatmax_col=-2;
-
-/*******************************************************************/
-
-/***************************** newwrap()  **************************/
-
-/*******************************************************************/
 void newwrap(int start, int size, int consensuspresent)
 {
     int g;
@@ -594,9 +520,10 @@ void newwrap(int start, int size, int consensuspresent)
         pdiag++;
         pcurr++;
     }
+
     /* backwards */
     end_of_trace = FALSE;
-    while ((!end_of_trace) && (realr > 1) && (r > 0)) {
+    while (!end_of_trace && realr > 1 && r > 0) {
         r--;
         realr--;
         Rows++;
@@ -638,6 +565,7 @@ void newwrap(int start, int size, int consensuspresent)
             pup--;
 
         }
+
         pcurr = &S[r][adjlength];
         pdiag = &Diag[adjmone];
         for (c = adjmone; c >= 0; c--) {
@@ -645,11 +573,10 @@ void newwrap(int start, int size, int consensuspresent)
             pcurr--;
             pdiag--;
         }
-        Diag[adjlength] = *pcurr;
 
+        Diag[adjlength] = *pcurr;
     }
 
-    /***********************************/
     r = 0;
     realr = start - 1;
 
@@ -667,7 +594,7 @@ void newwrap(int start, int size, int consensuspresent)
     }
 
     end_of_trace = FALSE;
-    while ((!end_of_trace) && (realr < Length) && (r < maxwraplength)) {
+    while (!end_of_trace && realr < Length && r < maxwraplength) {
         r++;
         realr++;
         Rows++;
@@ -684,15 +611,18 @@ void newwrap(int start, int size, int consensuspresent)
             pdiag++;
             pup++;
         }
+
         end_of_trace = TRUE;    /* setup for encountering a break in the trace */
         /*second pass */
         pcurr = &S[r][0];
+
         /* pleft set from first pass */
         pdiag = &Diag[0];
         pup = &Up[0];
+
         for (c = 0; c < size; c++) {
             *pup = (pleft = (*pcurr = max4(0, *pdiag, *pup, pleft)) + Delta);
-            if ((realr >= start) && (*pcurr == 0))
+            if (realr >= start && *pcurr == 0)
                 /* if (*pcurr==0) doesn't work with consensus */
                 *pup = pleft = *pcurr = -1000;
             else
@@ -703,6 +633,7 @@ void newwrap(int start, int size, int consensuspresent)
                 maxscore = *pcurr;
                 maxrow = realr; /* ??? do we need this? */
             }
+
             pcurr++;
             pdiag++;
             pup++;
@@ -720,7 +651,6 @@ void newwrap(int start, int size, int consensuspresent)
     }
 
     /* store last position scanned with this pattern */
-
     Wrapend = realr;
 
     /* redo for an accurate alignment if score is big enough to report */
@@ -736,7 +666,6 @@ void newwrap(int start, int size, int consensuspresent)
         /* maxscore in every column */
         maxscore = 0;
 
-        /****/
         pup = Up;
         pdiag = &Diag[0];
         pcurr = &S[r][0];
@@ -751,7 +680,7 @@ void newwrap(int start, int size, int consensuspresent)
         }
 
         end_of_trace = FALSE;
-        while ((!end_of_trace) && (realr < Length) && (r < maxwraplength)) {
+        while (!end_of_trace && realr < Length && r < maxwraplength) {
             r++;
             realr++;
             Rows++;
@@ -761,6 +690,7 @@ void newwrap(int start, int size, int consensuspresent)
             pleft = Delta;      /* first pass. S[r][adjlength]=0  */
             pdiag = &Diag[0];
             pup = &Up[0];
+
             for (c = 0; c < size; c++) {
                 *pdiag += match(currchar, EC[c]);
                 pleft = (*pcurr = max4(0, *pdiag, *pup, pleft)) + Delta;
@@ -768,9 +698,11 @@ void newwrap(int start, int size, int consensuspresent)
                 pdiag++;
                 pup++;
             }
+
             end_of_trace = TRUE;    /* setup for encountering a break in the trace */
             /*second pass */
             pcurr = &S[r][0];
+
             /* pleft set from first pass */
             pdiag = &Diag[0];
             pup = &Up[0];
@@ -789,6 +721,7 @@ void newwrap(int start, int size, int consensuspresent)
                     maxrow = r;
                     maxcol = c;
                 }
+
                 pcurr++;
                 pdiag++;
                 pup++;
@@ -801,8 +734,8 @@ void newwrap(int start, int size, int consensuspresent)
                 pcurr++;
                 pdiag++;
             }
-            Diag[0] = Diag[size];
 
+            Diag[0] = Diag[size];
         }
     }
 
@@ -815,29 +748,13 @@ void newwrap(int start, int size, int consensuspresent)
         Maxrow = maxrow;
         Maxcol = maxcol;
         Maxscore = maxscore;
-
     }
-
 }
-
-/*******************************************************************/
-
-/*******************************************************************/
-
-/*******************************************************************/
-
-/**********************************************************/
-
-/**********************************************************/
 
 void init_bestperiodlist(void)
 {
     Bestperiodlist->next = NULL;
 }
-
-/**********************************************************/
-
-/**********************************************************/
 
 void free_bestperiodlist(void)
 {
@@ -852,10 +769,6 @@ void free_bestperiodlist(void)
     }
 }
 
-/**********************************************************/
-
-/**********************************************************/
-
 /*** modified 6/2/05 G. Benson ***/
 void add_to_bestperiodlist(int d)
 {
@@ -865,8 +778,7 @@ void add_to_bestperiodlist(int d)
     /* when distance is 1, no Sortmultiples are defined due to change in multiples_criteria_4 */
     if (d != 1) {
 
-        ptr = (struct bestperiodlistelement *)
-            calloc(1, sizeof(struct bestperiodlistelement));
+        ptr = calloc(1, sizeof *ptr);
         if (ptr == NULL) {
             trf_message("\nAdd_to_bestperiodlist: Out of memory!");
             exit(-1);
@@ -972,54 +884,38 @@ int search_for_range_in_bestperiodlist(int start, int distance)
 
 }
 
-/*******************************************************************/
-
-/*******************************************************************/
 void init_distanceseenarray(void)
     /* created 5/23/05 G. Benson */
 {
-    Distanceseenarray = (struct distanceseenarrayelement *)
-        calloc(MAXDISTANCECONSTANT + 1, sizeof(struct distanceseenarrayelement));
+    Distanceseenarray = calloc(MAXDISTANCECONSTANT + 1, sizeof *Distanceseenarray);
     if (Distanceseenarray == NULL) {
         trf_message("\nInit Distanceseenarray: Out of memory!");
         exit(-1);
     }
 }
 
-/*******************************************************************/
-
-/*******************************************************************/
 void free_distanceseenarray(void)
-    /* created 5/23/05 G. Benson */
 {
     free(Distanceseenarray);
 }
 
-/*******************************************************************/
-
-/*******************************************************************/
+/* created 5/23/05 G. Benson */
+/* adds the extent of an alignment (end) at the given distance
+ * location and score are not currently used */
 void add_to_distanceseenarray(int location, int distance, int end, int score)
-    /* created 5/23/05 G. Benson */
-    /* adds the extent of an alignment (end) at the given distance
-     * location and score are not currently used */
 {
     struct distanceseenarrayelement *ptr;
 
     ptr = &Distanceseenarray[distance];
-
     ptr->index = location;
     ptr->end = end;
     ptr->score = score;
-
 }
 
-/*******************************************************************/
-
-/*******************************************************************/
+/* created 5/23/05 G. Benson */
+/* searches for an alignment with patternsize of distance in the region
+ * including start.  True means found and alignment should be blocked. */
 int search_for_distance_match_in_distanceseenarray(int distance, int start)
-    /* created 5/23/05 G. Benson */
-    /* searches for an alignment with patternsize of distance in the region
-     * including start.  True means found and alignment should be blocked. */
 {
     struct distanceseenarrayelement ptr;
 
@@ -1031,25 +927,10 @@ int search_for_distance_match_in_distanceseenarray(int distance, int start)
         return FALSE;
 }
 
-/*******************************************************************/
-
-/*******************************************************************/
-
-/*******************************************************************/
-
-/*******************************************************************/
-
-/*******************************************************************/
-
-/*******************************************************************/
 void init_distanceseenlist()
 {
     Distanceseenlist->next = NULL;
 }
-
-/*******************************************************************/
-
-/*******************************************************************/
 
 void free_distanceseenlist()
 {
@@ -1064,17 +945,12 @@ void free_distanceseenlist()
     }
 }
 
-/*******************************************************************/
-
-/*******************************************************************/
-
 void add_to_distanceseenlist(int location, int distance, int end, int score, int acceptstatus)
 {
     int changed_from_distance;  /* 3/14/05 */
     struct distancelistelement *ptr, *entry;
 
-    ptr = (struct distancelistelement *)
-        calloc(1, sizeof(struct distancelistelement));
+    ptr = calloc(1, sizeof *ptr);
     if (ptr == NULL) {
         trf_message("\nAdd_to_distanceseenlist: Out of memory!");
         exit(-1);
@@ -1085,12 +961,11 @@ void add_to_distanceseenlist(int location, int distance, int end, int score, int
      * it blocks further along in the sequence than reported by the consensus
      * sequence */
     entry = Distanceseenlist->next;
-    /*
-     * if((acceptstatus==WITHCONSENSUS)&&(distance==entry->distance)
-     * &&(location==entry->index)&&(end<=entry->end))
-     */
-    if ((acceptstatus == WITHCONSENSUS) /* removed matching d because consensussize may be different */
-        &&(location == entry->index) && (end <= entry->end) && ((distance <= 250) || (distance == entry->distance))) {  /* put back d match unless d under 250 */
+
+    if (acceptstatus == WITHCONSENSUS /* removed matching d because consensussize may be different */
+    && location == entry->index 
+    && end <= entry->end 
+    && (distance <= 250 || distance == entry->distance)) {  /* put back d match unless d under 250 */
         /* don't remove Distanceseenlist element,
          * but make end=0 so it will be removed by
          * search_for_distance_in_distanceseenlist
@@ -1118,18 +993,14 @@ void add_to_distanceseenlist(int location, int distance, int end, int score, int
     Distanceseenlist->next = ptr;
 }
 
-/*******************************************************************/
-
-/*******************************************************************/
-
+/* tests for exact same distance or a difference in distance
+ * of less equal 2; finding a match means ruling
+ * out redoing the alignment with that distance */
+/* later, should include a test based on multiples where the actual
+ * score and the theoretical best score (all matches) are compared; if
+ * the actual score is close to the theoretical score, then don't redo
+ * the alignment */
 int search_for_distance_match_in_distanceseenlist(int distance, int start)
-    /* tests for exact same distance or a difference in distance
-     * of less equal 2; finding a match means ruling
-     * out redoing the alignment with that distance */
-    /* later, should include a test based on multiples where the actual
-     * score and the theoretical best score (all matches) are compared; if
-     * the actual score is close to the theoretical score, then don't redo
-     * the alignment */
 {
     struct distancelistelement *entry, *entrylast, *temp;
     int absdiff;
@@ -1137,20 +1008,14 @@ int search_for_distance_match_in_distanceseenlist(int distance, int start)
     entry = Distanceseenlist->next;
     entrylast = Distanceseenlist;
     while (entry != NULL) {
-
-                                                                            /*  if (entry->end<min(start-distance,start-Min_Distance_Window)) *//***???***/
         /* This change added 11/1/01 to allow repeats that are smaller than Min_Distance_Window to
          * be detected *following* another repeat.  The problem was that the first repeat could block
          * any repeat that followed it, but ended within Min_Distance_Window of the end of the first
          * repeat.  By using Minscore/Alpha, the first repeat can't block anything past its own end. */
 
-        /*    if (entry->end<min(start-distance,start-Minscore/Alpha)+1)  */
-
-        if (entry->end < min(start - distance, max(start - Minscore / Alpha, start - Min_Distance_Window)) + 1)
-            /* +1 added to correct for the < instead of <= */
-
-            /* changed start to start-distance */
-        {
+        /* +1 added to correct for the < instead of <= */
+        /* changed start to start-distance */
+        if (entry->end < min(start - distance, max(start - Minscore / Alpha, start - Min_Distance_Window)) + 1) {
             entrylast->next = entry->next;
             temp = entry;
             entry = entrylast;
@@ -1161,31 +1026,27 @@ int search_for_distance_match_in_distanceseenlist(int distance, int start)
                 absdiff = distance - entry->distance;
             else
                 absdiff = entry->distance - distance;
+
             if (absdiff == 0) {
                 return TRUE;
             }
+
             /* new idea 2/11/05 use an extra field called changed_from_distance to store the old distance
              * when you have a consensus.  In search_for_distance_on_distanceseen_list, if distance doesn't
              * match, but is close, say within 5, then also look at changed_from_distance for a match.
              */
-            else if ((absdiff <= 5) && (distance == entry->changed_from_distance)) {
+            else if (absdiff <= 5 && distance == entry->changed_from_distance) {
                 return TRUE;
             }
-
         }
+
         /* go to next entry */
         entrylast = entry;
         entry = entry->next;
     }
+
     return FALSE;
-
 }
-
-/*******************************************************************/
-
-/*********************  get_narrowband_pair_alignment_with_copynumber()  **********************/
-
-/*******************************************************************/
 
 void get_narrowband_pair_alignment_with_copynumber(int size, int bandradius, int option)
 
@@ -1288,139 +1149,137 @@ else
     int legitimateZero;
 
     if (ldong)                  /* null statement */
-        ;
+        return;
 
-    else {
-        w = bandradius;
-        x = Sequence;
-        y = EC;
+    w = bandradius;
+    x = Sequence;
+    y = EC;
 
-        realr = Maxrealrow;
-        r = Maxrow;
-        c = Maxcol;
-        k = (Maxcol - Bandcenter[r] + size) % size;
-        if (size - k <= k)
-            k = -(size - k);
-        i = w + k;
-        fullcopy = (Maxcol + 1) % size;
+    realr = Maxrealrow;
+    r = Maxrow;
+    c = Maxcol;
+    k = (Maxcol - Bandcenter[r] + size) % size;
+    if (size - k <= k)
+        k = -(size - k);
+    i = w + k;
+    fullcopy = (Maxcol + 1) % size;
 
-        AlignPair.score = S[r][i];
-        length = 0;
-        Copynumber = 0;
-        for (;;) {
-            /* stop at zeros or -1000 for local */
-            /* stop at r=0 for global */
+    AlignPair.score = S[r][i];
+    length = 0;
+    Copynumber = 0;
+    for (;;) {
+        /* stop at zeros or -1000 for local */
+        /* stop at r=0 for global */
 
-            //change 8.20.12 Gary Benson
-            //check for legitimate zero in alignment score (not from local alignment zeroing)
-            //and allow to go back past that zero in alignment array
-            //used to capture some alignments with mutations near the beginning
-            //check to see if LOCAL zero score is a legitimate zero not a local zero
+        //change 8.20.12 Gary Benson
+        //check for legitimate zero in alignment score (not from local alignment zeroing)
+        //and allow to go back past that zero in alignment array
+        //used to capture some alignments with mutations near the beginning
+        //check to see if LOCAL zero score is a legitimate zero not a local zero
+        legitimateZero = 0;
+        if ((option == LOCAL) && (S[r][i] == 0) && r != 0) {
+            //get upi
+            k = (c - Bandcenter[r - 1] + size) % size;
+            if (size - k <= k)
+                k = -(size - k);
+            upi = w + k;
+            //get k
+            k = (Bandcenter[r] - Bandcenter[r - 1] + size) % size;
+            if (size - k <= k)
+                k = -(size - k);
+            if (k >= 1) {   /* band shifts right */
+                if (i <= 2 * w - k) {
+                    if ((S[r][i] == S[r - 1][upi - 1] + match(x[realr], y[c]))
+                        || (S[r][i] == S[r - 1][upi] + Delta)
+                        || (S[r][i] == S[r][i - 1] + Delta))
+                        legitimateZero = 1;
+                }
+                else if (i == 2 * w - k + 1) {
+                    if ((S[r][i] == S[r - 1][upi - 1] + match(x[realr], y[c]))
+                        || (S[r][i] == S[r][i - 1] + Delta))
+                        legitimateZero = 1;
+                }
+                else {
+                    if (S[r][i] == S[r][i - 1] + Delta)
+                        legitimateZero = 1;
+                }
+            }
+            else {          /* (k<=0) band shifts left */
+                k = -k;
+                if (i <= k - 1) {
+                    if (S[r][i] == S[r][i - 1] + Delta)
+                        legitimateZero = 1;
+                }
+                else if (i == k) {
+                    if ((S[r][i] == S[r - 1][upi] + Delta)
+                        || (S[r][i] == S[r][i - 1] + Delta))
+                        legitimateZero = 1;
+                }
+                else {
+                    if ((S[r][i] == S[r - 1][upi - 1] + match(x[realr], y[c]))
+                        || (S[r][i] == S[r - 1][upi] + Delta)
+                        || (S[r][i] == S[r][i - 1] + Delta))
+                        legitimateZero = 1;
+                }
+            }
+            //debug
+            //if (legitimateZero) {
+            //report where
+            //  printf("\nlegitimate zero at r:%d,i:%d",r,i);
+            //}
+        }
+
+        /* stop at zeros or -1000 for local */
+        /* stop at r=0 for global */
+        if (r == 0 || ((option == LOCAL) && (S[r][i] <= 0) && !legitimateZero)
+            || ((option == GLOBAL) && (r == 0) && (c == -1)))
+            //debug (uncomment to restore)
+            /*
+             * if (((option==LOCAL)&&(S[r][i]<=0))||((option==GLOBAL)&&(r==0)&&(c==-1)))
+             */
+        {
             legitimateZero = 0;
-            if ((option == LOCAL) && (S[r][i] == 0) && r != 0) {
-                //get upi
-                k = (c - Bandcenter[r - 1] + size) % size;
-                if (size - k <= k)
-                    k = -(size - k);
-                upi = w + k;
-                //get k
+            AlignPair.length = length;
+            if (Maxcol >= c) {
+                Copynumber += ((double)(Maxcol - c)) / size;
+            }
+            else {
+                Copynumber += ((double)(Maxcol + size - c)) / size;
+            } return;
+        }
+        else {
+            k = (c - Bandcenter[r - 1] + size) % size;
+            if (size - k <= k)
+                k = -(size - k);
+            upi = w + k;
+            /* in case global goes to c==-1 */
+            if ((option == GLOBAL) && (c == -1)) {
+            test_up report_error_up}
+            else {
                 k = (Bandcenter[r] - Bandcenter[r - 1] + size) % size;
                 if (size - k <= k)
                     k = -(size - k);
                 if (k >= 1) {   /* band shifts right */
                     if (i <= 2 * w - k) {
-                        if ((S[r][i] == S[r - 1][upi - 1] + match(x[realr], y[c]))
-                            || (S[r][i] == S[r - 1][upi] + Delta)
-                            || (S[r][i] == S[r][i - 1] + Delta))
-                            legitimateZero = 1;
+                        test_match_mismatch test_up test_left report_error_match_up_left;
                     }
                     else if (i == 2 * w - k + 1) {
-                        if ((S[r][i] == S[r - 1][upi - 1] + match(x[realr], y[c]))
-                            || (S[r][i] == S[r][i - 1] + Delta))
-                            legitimateZero = 1;
+                        test_match_mismatch test_left report_error_match_left;
                     }
                     else {
-                        if (S[r][i] == S[r][i - 1] + Delta)
-                            legitimateZero = 1;
+                        test_left report_error_left;
                     }
                 }
-                else {          /* (k<=0) band shifts left */
+                else {      /* (k<=0) band shifts left */
                     k = -k;
                     if (i <= k - 1) {
-                        if (S[r][i] == S[r][i - 1] + Delta)
-                            legitimateZero = 1;
+                        test_left report_error_left;
                     }
                     else if (i == k) {
-                        if ((S[r][i] == S[r - 1][upi] + Delta)
-                            || (S[r][i] == S[r][i - 1] + Delta))
-                            legitimateZero = 1;
+                        test_up test_left report_error_up_left;
                     }
                     else {
-                        if ((S[r][i] == S[r - 1][upi - 1] + match(x[realr], y[c]))
-                            || (S[r][i] == S[r - 1][upi] + Delta)
-                            || (S[r][i] == S[r][i - 1] + Delta))
-                            legitimateZero = 1;
-                    }
-                }
-                //debug
-                //if (legitimateZero) {
-                //report where
-                //  printf("\nlegitimate zero at r:%d,i:%d",r,i);
-                //}
-            }
-
-            /* stop at zeros or -1000 for local */
-            /* stop at r=0 for global */
-            if (r == 0 || ((option == LOCAL) && (S[r][i] <= 0) && !legitimateZero)
-                || ((option == GLOBAL) && (r == 0) && (c == -1)))
-                //debug (uncomment to restore)
-                /*
-                 * if (((option==LOCAL)&&(S[r][i]<=0))||((option==GLOBAL)&&(r==0)&&(c==-1)))
-                 */
-            {
-                legitimateZero = 0;
-                AlignPair.length = length;
-                if (Maxcol >= c) {
-                    Copynumber += ((double)(Maxcol - c)) / size;
-                }
-                else {
-                    Copynumber += ((double)(Maxcol + size - c)) / size;
-                } return;
-            }
-            else {
-                k = (c - Bandcenter[r - 1] + size) % size;
-                if (size - k <= k)
-                    k = -(size - k);
-                upi = w + k;
-                /* in case global goes to c==-1 */
-                if ((option == GLOBAL) && (c == -1)) {
-                test_up report_error_up}
-                else {
-                    k = (Bandcenter[r] - Bandcenter[r - 1] + size) % size;
-                    if (size - k <= k)
-                        k = -(size - k);
-                    if (k >= 1) {   /* band shifts right */
-                        if (i <= 2 * w - k) {
-                            test_match_mismatch test_up test_left report_error_match_up_left;
-                        }
-                        else if (i == 2 * w - k + 1) {
-                            test_match_mismatch test_left report_error_match_left;
-                        }
-                        else {
-                            test_left report_error_left;
-                        }
-                    }
-                    else {      /* (k<=0) band shifts left */
-                        k = -k;
-                        if (i <= k - 1) {
-                            test_left report_error_left;
-                        }
-                        else if (i == k) {
-                            test_up test_left report_error_up_left;
-                        }
-                        else {
-                            test_match_mismatch test_up test_left report_error_match_up_left;
-                        }
+                        test_match_mismatch test_up test_left report_error_match_up_left;
                     }
                 }
             }
@@ -1428,17 +1287,9 @@ else
     }
 }
 
-/************************************************************/
-
-/*******************************************************************/
-
-/*********************  get_pair_alignment_with_copynumber()  **********************/
-
-/*******************************************************************/
-
+/* for a repeat of EC, do a traceback alignment, */
+/* ending at row Maxrow and column Maxcol */
 void get_pair_alignment_with_copynumber(int size)
-    /* for a repeat of EC, do a traceback alignment, */
-    /* ending at row Maxrow and column Maxcol */
 {
 
     int i, j, si, length, adjlength, fullcopy;
@@ -1691,13 +1542,7 @@ void print_alignment_headings(int consensuslength)
         AlignPair.indexprime[AlignPair.length], Period, Copynumber, consensuslength, (int)OUTPUTcount);
     fprintf(Fptxt, "</A>");
 
-#if defined(WINDOWSGUI)
-    fprintf(Fptxt,
-        "<P>See <FONT COLOR=\"#0000FF\">Alignment Explanation</FONT> in Tandem Repeats Finder Help</P><BR>\n");
-#elif defined(WINDOWSCONSOLE)
-    fprintf(Fptxt,
-        "<A HREF=\"http://tandem.bu.edu/trf/trf.definitions.html#alignment\" target =\"explanation\">Alignment explanation</A><BR><BR>\n");
-#elif defined(UNIXGUI)
+#if defined(UNIXGUI)
     fprintf(Fptxt,
         "<P>See <FONT COLOR=\"#0000FF\">Alignment Explanation</FONT> in Tandem Repeats Finder Help</P><BR>\n");
 #elif defined(UNIXCONSOLE)
@@ -1712,12 +1557,6 @@ void print_alignment_headings(int consensuslength)
 }
 
 #if WEIGHTCONSENSUS
-
-/*******************************************************************/
-
-/****************************  get_consensus()  ********************/
-
-/*******************************************************************/
 
 void get_consensus(int patternsize)
 {
@@ -1781,9 +1620,9 @@ void get_consensus(int patternsize)
             insertC = 0;
             insertG = 0;
             insertT = 0;
-            while ((AlignPair.indexsecnd[i] == lastindex)
-                && (i <= AlignPair.length)) {
 
+            while (AlignPair.indexsecnd[i] == lastindex && i <= AlignPair.length) {
+                // TODO: Verify that fallthrough is what we want. boa@20240726
                 switch (AlignPair.textprime[i]) {
                     case 'A':
                         if (insertA == 0) {
@@ -1810,11 +1649,11 @@ void get_consensus(int patternsize)
                             break;
                         }
                 }
+
                 Consensus.letters[2 * AlignPair.indexsecnd[i]]++;
                 i++;
             }
         }
-
     }
 
     /* get consensus for letters that exist */
@@ -1849,23 +1688,26 @@ void get_consensus(int patternsize)
         if (Consensus.total[i] != 0) {
             max = Consensus.A[i];
             maxchar = 'A';
+
             if (max < Consensus.C[i]) {
                 max = Consensus.C[i];
                 maxchar = 'C';
             }
+
             if (max < Consensus.G[i]) {
                 max = Consensus.G[i];
                 maxchar = 'G';
             }
+
             if (max < Consensus.T[i]) {
                 max = Consensus.T[i];
                 maxchar = 'T';
             }
-            if (((max * Alpha) +
-                    ((Consensus.insert[i] - max) * Beta) +
-                    ((Consensus.letters[i] - Consensus.insert[i]) * Delta) +
-                    ((Consensus.total[i] - Consensus.insert[i]) * Delta))
-                > (Consensus.letters[i] * Delta))
+
+            if (((max * Alpha) 
+            + ((Consensus.insert[i] - max) * Beta)
+            + ((Consensus.letters[i] - Consensus.insert[i]) * Delta) 
+            + ((Consensus.total[i] - Consensus.insert[i]) * Delta)) > (Consensus.letters[i] * Delta))
                 Consensus.pattern[i] = maxchar;
             else
                 Consensus.pattern[i] = DASH;
@@ -1874,24 +1716,17 @@ void get_consensus(int patternsize)
     }
 
     /* compress consensus */
-
     j = 0;
     for (i = 0; i <= 2 * patternlength; i++)
         if (Consensus.pattern[i] != DASH) {
             Consensus.pattern[j] = Consensus.pattern[i];
             j++;
         }
-    ConsClasslength = j;
 
+    ConsClasslength = j;
 }
 
 #else
-
-/*******************************************************************/
-
-/****************************  get_consensus()  ********************/
-
-/*******************************************************************/
 
 void get_consensus(int patternlength)
 {
@@ -1927,27 +1762,31 @@ void get_consensus(int patternlength)
                 case 'A':
                     Consensus.A[2 * AlignPair.indexsecnd[i] + 1]++;
                     break;
+
                 case 'C':
                     Consensus.C[2 * AlignPair.indexsecnd[i] + 1]++;
                     break;
+
                 case 'G':
                     Consensus.G[2 * AlignPair.indexsecnd[i] + 1]++;
                     break;
+
                 case 'T':
                     Consensus.T[2 * AlignPair.indexsecnd[i] + 1]++;
                     break;
+
                 case DASH:
                     Consensus.dash[2 * AlignPair.indexsecnd[i] + 1]++;
                     break;
             }
+
             if (lastindex != -1) {
-                if (AlignPair.indexsecnd[i] == patternlength - 1) {
+                if (AlignPair.indexsecnd[i] == patternlength - 1)
                     Consensus.total[0]++;
-                }
-                else {
+                else
                     Consensus.total[2 * AlignPair.indexsecnd[i] + 2]++;
-                }
             }
+
             lastindex = AlignPair.indexsecnd[i];
             i++;
 
@@ -1962,98 +1801,106 @@ void get_consensus(int patternlength)
                     case 'A':
                         Consensus.A[2 * AlignPair.indexsecnd[i]]++;
                         break;
+
                     case 'C':
                         Consensus.C[2 * AlignPair.indexsecnd[i]]++;
                         break;
+
                     case 'G':
                         Consensus.G[2 * AlignPair.indexsecnd[i]]++;
                         break;
+
                     case 'T':
                         Consensus.T[2 * AlignPair.indexsecnd[i]]++;
                         break;
+
                     case DASH:
                         Consensus.dash[2 * AlignPair.indexsecnd[i]]++;
                         break;
                 }
+
                 i++;
             }
         }
-
     }
 
     for (i = 1; i <= 2 * (patternlength); i += 2) {
         max = Consensus.dash[i];
         maxchar = DASH;
+
         if (max < Consensus.A[i]) {
             max = Consensus.A[i];
             maxchar = 'A';
         }
+
         if (max < Consensus.C[i]) {
             max = Consensus.C[i];
             maxchar = 'C';
         }
+
         if (max < Consensus.G[i]) {
             max = Consensus.G[i];
             maxchar = 'G';
         }
+
         if (max < Consensus.T[i]) {
             max = Consensus.T[i];
             maxchar = 'T';
         }
+
         Consensus.pattern[i] = maxchar;
     }
+
     for (i = 0; i <= 2 * (patternlength); i += 2) {
-        if ((Consensus.total[i] != 0)
-            && (((float)Consensus.insert[i] / Consensus.total[i]) >= 0.5)) {
+        if (Consensus.total[i] != 0
+        && (float)Consensus.insert[i] / Consensus.total[i] >= 0.5) {
             max = Consensus.A[i];
             maxchar = 'A';
+
             if (max < Consensus.C[i]) {
                 max = Consensus.C[i];
                 maxchar = 'C';
             }
+
             if (max < Consensus.G[i]) {
                 max = Consensus.G[i];
                 maxchar = 'G';
             }
+
             if (max < Consensus.T[i]) {
                 max = Consensus.T[i];
                 maxchar = 'T';
             }
-            /*      if (max<Consensus.total[i]/2){maxchar='X';} */
         }
-
         else
             maxchar = DASH;
-        Consensus.pattern[i] = maxchar;
 
+        Consensus.pattern[i] = maxchar;
     }
+
     j = 0;
     for (i = 0; i <= 2 * patternlength; i++)
         if (Consensus.pattern[i] != DASH) {
             Consensus.pattern[j] = Consensus.pattern[i];
             j++;
         }
-    ConsClasslength = j;
 
+    ConsClasslength = j;
 }
 
 #endif
 
 struct distanceentry *_DistanceEntries;
 
-/****************************************************/
-
 struct distancelist *new_distancelist()
 {
     int g, N, K;
     struct distanceentry *ptr;
 
-    struct distancelist *objptr = (struct distancelist *)
-        calloc(MAXDISTANCE + 1, sizeof(struct distancelist));
+    struct distancelist *objptr = calloc(MAXDISTANCE + 1, sizeof *objptr);
 
     K = Min_Distance_Entries + 1;
     N = MAXDISTANCE + 1;
-    //ptr = _DistanceEntries = malloc( (((N*(N+1) - K*(K+1))/2) + K*(K-1)) * sizeof(struct distanceentry) );
     ptr = _DistanceEntries = malloc(((K + N) * (N - K + 1) / 2 + K * (K - 1)) * sizeof(struct distanceentry));
 
     for (g = 1; g <= MAXDISTANCE; g++) {
@@ -2062,27 +1909,16 @@ struct distancelist *new_distancelist()
         ptr += (max(g, Min_Distance_Entries) + 1);
     }
 
-    /*
-     *
-     * for(g=1;g<=MAXDISTANCE;g++)
-     * {
-     * objptr[g].entry=(struct distanceentry *)
-     * calloc(max(g,Min_Distance_Entries)+1,sizeof(struct distanceentry));
-     * }
-     */
-
     return objptr;
 }
 
 void clear_distancelist(struct distancelist *objptr)
 {
-    int g;
-
-    for (g = 1; g <= MAXDISTANCE; g++) {
-        objptr[g].lowindex = 0;
-        objptr[g].highindex = max(g, Min_Distance_Entries);
-        objptr[g].numentries = 0;
-        objptr[g].nummatches = 0;
+    for (int i = 1; i <= MAXDISTANCE; i++) {
+        objptr[i].lowindex = 0;
+        objptr[i].highindex = max(i, Min_Distance_Entries);
+        objptr[i].numentries = 0;
+        objptr[i].nummatches = 0;
     }
 }
 
@@ -2098,18 +1934,17 @@ void add_tuple_match_to_Distance_entry(int location, int size, int d, struct dis
     int windowleftend, windowsize;
     struct distancelist *list;
 
-    /* get distance window pointers */
-    windowsize = max(d, Min_Distance_Entries) + 1;  /* this value is used to */
-    /* mod the index to the */
-    /* entries.  The entries */
-    /* run from 0 to */
-    /* max(d,Min_Distance_Entries) */
-    list = &(objptr[d]);
-    hi = &(list->highindex);
-    lo = &(list->lowindex);
-    z = &(list->numentries);
-    m = &(list->nummatches);
-    if ((*z) != 0) {            /* there exist previous entries on this list */
+    /* get distance window pointers.
+     * this value is used to  mod the index to the entries.
+     * The entries run from 0 to max(d,Min_Distance_Entries) */
+    windowsize = max(d, Min_Distance_Entries) + 1;  
+    list = &objptr[d];
+    hi = &list->highindex;
+    lo = &list->lowindex;
+    z = &list->numentries;
+    m = &list->nummatches;
+
+    if (*z != 0) {            /* there exist previous entries on this list */
         /* first remove trailing entries, i.e., */
         /* those with location<location-d or */
         /* <location-Min_Distance_Window, whichever is further back */
@@ -2123,17 +1958,16 @@ void add_tuple_match_to_Distance_entry(int location, int size, int d, struct dis
             (*lo)++;
             (*lo) %= windowsize;
         }
-
     }
-    if (((*z) != 0) && (list->entry[*hi].location == location - 1))
-        /* there are still more entries and this is an adjacent tuple, */
-        /* just add on to last entry */
-    {
+
+    /* there are still more entries and this is an adjacent tuple, */
+    /* just add on to last entry */
+    if (*z != 0 && list->entry[*hi].location == location - 1) {
         list->entry[*hi].location++;
         list->entry[*hi].size++;
         (*m)++;
     }
-    else {                      /* need a new entry here */
+    else { /* need a new entry here */
         (*z)++;
         (*hi)++;
         (*hi) %= windowsize;
@@ -2145,7 +1979,6 @@ void add_tuple_match_to_Distance_entry(int location, int size, int d, struct dis
 
 void link_Distance_window(int d)
 {
-
     int t, f, h;
 
     /* get next highest tag */
@@ -2153,6 +1986,7 @@ void link_Distance_window(int d)
     if (Tag[t] < d) {           /* Tag[t] is the largest index less or */
         /* equal to (t)x(TAGSEP) that is linked */
         f = Tag[t];             /* f is first linked index below d */
+
         while ((t <= Toptag) && (Tag[t] < d)) {
             Tag[t] = d;
             t++;
@@ -2160,14 +1994,15 @@ void link_Distance_window(int d)
     }
     else if (Tag[t] > d) {      /* follow links to insert d */
         f = Tag[t];
+
         while (f > d)
             f = Distance[f].linkdown;
+
         /* f is first linked index below d */
         if (f == d)
             trf_message("\nTag error following links.  f==d=%d", d);
     }
-    else                        //if(Tag[t]==d) // 'if' Not needed; only remaining case
-    {
+    else {
         trf_message("\nTag error Tag[%d]=%d", t, d);
         exit(-2);
     }
@@ -2179,25 +2014,23 @@ void link_Distance_window(int d)
     Distance[f].linkup = d;
     if (h <= MAXDISTANCE)
         Distance[h].linkdown = d;
+
     Distance[d].linked = TRUE;
 }
 
 void untag_Distance_window(int d, int linkdown)
 {
-
-    int t;
-
     /* get next highest tag */
-    t = (int)ceil(d / TAGSEP);
+    int t = (int)ceil(d / TAGSEP);
+
+    /* Tag[t] is the largest index less or equal to (t)x(TAGSEP) that is linked */
     if (Tag[t] != d)
-        return;                 /* Tag[t] is the largest index less or */
-    /* equal to (t)x(TAGSEP) that is linked */
-    else {
-        while ((t <= Toptag) && (Tag[t] == d)) {    /* check higer tags and replace d */
-            /* with its linkdown */
-            Tag[t] = linkdown;
-            t++;
-        }
+        return;                 
+
+    while ((t <= Toptag) && (Tag[t] == d)) {    /* check higher tags and replace d */
+        /* with its linkdown */
+        Tag[t] = linkdown;
+        t++;
     }
 }
 
@@ -2208,18 +2041,17 @@ int no_matches_so_unlink_Distance(int d, int location, struct distancelist *objp
     int windowleftend, windowsize;
     struct distancelist *list;
 
-    windowsize = max(d, Min_Distance_Entries) + 1;  /* this value is used to */
-    /* mod the index to the */
-    /* entries.  The entries */
-    /* run from 0 to */
-    /* max(d,Min_Distance_Entries) */
+    /* this value is used to  mod the index to the entries. 
+     * The entries run from 0 to max(d,Min_Distance_Entries) */
+    windowsize = max(d, Min_Distance_Entries) + 1;  
 
-    list = &(objptr[d]);
-    hi = &(list->highindex);
-    lo = &(list->lowindex);
-    z = &(list->numentries);
-    m = &(list->nummatches);
-    if ((*z) != 0) {            /* there exist previous entries on this list */
+    list = &objptr[d];
+    hi = &list->highindex;
+    lo = &list->lowindex;
+    z = &list->numentries;
+    m = &list->nummatches;
+
+    if (*z != 0) {            /* there exist previous entries on this list */
         /* first remove trailing entries, i.e., */
         /* those with location<location-d or */
         /* <location-Min_Distance_Window, whichever is further back */
@@ -2236,7 +2068,8 @@ int no_matches_so_unlink_Distance(int d, int location, struct distancelist *objp
                 trf_message("\n    no_matches; *lo:%d windowsize:%d", *lo, windowsize);
         }
     }
-    if ((*z) == 0) {            /* no more matches, so unlink */
+
+    if (*z == 0) {  /* no more matches, so unlink */
         /* given a distance d with zero matches, unlink from list */
         g = Distance[d].linkdown;
         h = Distance[d].linkup;
@@ -2244,13 +2077,14 @@ int no_matches_so_unlink_Distance(int d, int location, struct distancelist *objp
         Distance[g].linkup = h;
         if (h <= MAXDISTANCE)
             Distance[h].linkdown = g;
+
         Distance[d].linked = FALSE;
 
         /* once unlinked, we must also untag if it is a tag */
         untag_Distance_window(d, g);
-
         return 1;
     }
+
     return 0;
 }
 
@@ -2266,12 +2100,12 @@ int GetTopPeriods(unsigned char *pattern, int length, int *toparray)
     double n, xysum, xsum, ysum, x2sum, s;
 
     /* allocate an array of counts */
-    counts = (double *)calloc(length, sizeof(double));
+    counts = calloc(length, sizeof *counts);
     if (counts == NULL)
         return 1;
 
     /* allocate history array */
-    history = (int *)malloc(length * sizeof(int));
+    history = malloc(length * sizeof *history);
     if (history == NULL) {
         free(counts);
         return 1;
@@ -2995,7 +2829,7 @@ void get_statistics(int consensussize)
         IL *newptr;
 
         /* create new index list element */
-        newptr = (IL *) malloc(sizeof(IL));
+        newptr =  malloc(sizeof *newptr);
         if (newptr == NULL) {
             FreeList(GlobalIndexList);
             GlobalIndexList = NULL;
@@ -3025,7 +2859,7 @@ void get_statistics(int consensussize)
         newptr->entropy = entropy;
 
         /* allocate memory to place the pattern and copy data into it */
-        newptr->pattern = (char *)malloc((consensussize + 1) * sizeof(char));
+        newptr->pattern = malloc(consensussize + 1);
         if (newptr->pattern == NULL) {
             free(newptr);
             FreeList(GlobalIndexList);
@@ -3033,13 +2867,16 @@ void get_statistics(int consensussize)
             GlobalIndexListTail = NULL;
             return;
         }
+
         printECtoBuffer(newptr->pattern, startECpos, consensussize);
 
-        if (GlobalIndexList == NULL) {  /* first element */
+        if (GlobalIndexList == NULL) {  
+            /* first element */
             GlobalIndexList = GlobalIndexListTail = newptr;
             GlobalIndexListTail->next = NULL;
         }
-        else {                  /* add new element to end of list */
+        else {
+            /* add new element to end of list */
             GlobalIndexListTail->next = newptr;
             GlobalIndexListTail = newptr;
             GlobalIndexListTail->next = NULL;
@@ -3049,7 +2886,6 @@ void get_statistics(int consensussize)
 
 }
 
-/*******************************************************************/
 void init_and_fill_coin_toss_stats2000_with_4tuplesizes(void)
 {
     /* generated with the following parameters:
@@ -3689,20 +3525,9 @@ void init_and_fill_coin_toss_stats2000_with_4tuplesizes(void)
 
 extern void SetProgressBar(void);
 
-/*******************************************************************/
-
-/****************************  newtupbo()  *****************************/
-
-/*******************************************************************/
-
-/*??*/
-
 /* last update May 19, 1997 */
-
 /* started may 13, 1997 */
-
 /* uses different tuple sizes for different distances */
-
 void newtupbo(void)
 {
     int mintuplesize, maxtuplesize, build_entire_code, g, badcharindex;
@@ -3715,7 +3540,8 @@ void newtupbo(void)
      * Always initialize here. Freed at the end of this function.
      * maxwraplength has already been initialized in the calling
      * function, TRF */
-    Bandcenter = calloc(maxwraplength + 1, sizeof(*Bandcenter));
+    Bandcenter = calloc(maxwraplength + 1, sizeof *Bandcenter);
+    // TODO: Add error test. boa@20240726
 
     /* Jan 27, 2006, Gelfand, changed to use Similarity Matrix to avoid N matching itself */
     /* This function may be called multiple times (for different match/mismatch scores) */
@@ -3731,7 +3557,7 @@ void newtupbo(void)
     mintuplesize = Tuplesize[1];
     maxtuplesize = Tuplesize[NTS];
     for (g = 1; g <= NTS; g++) {
-        Tuplehash[g] = (int *)farcalloc(four_to_the[Tuplesize[g]], sizeof(int));
+        Tuplehash[g] = calloc(four_to_the[Tuplesize[g]], sizeof(int));
         Historysize[g] = 2 * (Tuplemaxdistance[g] + 1) + 2; /* The idea here is that no */
         /* previous history pointer points back */
         /* more than Tuplemaxdistance.  Then, when */
@@ -3739,14 +3565,12 @@ void newtupbo(void)
         /* links from the current will exceed the */
         /* maxdistance before reaching the reused */
         /* entry. */
-        History[g] = (struct historyentry *)
-            farcalloc(Historysize[g], sizeof(struct historyentry));
+        History[g] = calloc(Historysize[g], sizeof(struct historyentry));
         Nextfreehistoryindex[g] = 1;    /* set all to 1 because 0 indicates */
         /* Tuplehash points to nothing */
-
     }
 
-    Sortmultiples = (int *)calloc(MAXDISTANCE + 1, sizeof(int));
+    Sortmultiples = calloc(MAXDISTANCE + 1, sizeof *Sortmultiples);
 
     build_entire_code = 1;
 
@@ -3763,13 +3587,14 @@ void newtupbo(void)
             if (paramset.ngs != 1)
                 SetProgressBar();
         }
-        if ((i == 0)            /* before start of sequence or */
-            ||(strchr("acgtACGT", Sequence[i]) == NULL)) {  /* not one of A,C,G,T */
+        if (i == 0            /* before start of sequence or */
+        || strchr("acgtACGT", Sequence[i]) == NULL) {  /* not one of A,C,G,T */
             badcharindex = i;
             build_entire_code = 1;
+
             /* find first good string of mintupsize characters */
             g = 0;
-            while ((g < mintuplesize) && (i < Length)) {
+            while (g < mintuplesize && i < Length) {
                 i++;
                 if (strchr("acgtACGT", Sequence[i]) == NULL) {
                     badcharindex = i;
@@ -3778,22 +3603,24 @@ void newtupbo(void)
                 else
                     g++;
             }
+
             if (g < mintuplesize)
                 break;          /* i=Length and minimum tuple not found */
         }
+
         if (build_entire_code) {
             code = 0;
-            for (g = badcharindex + 1; g <= i; g++) {
+            for (g = badcharindex + 1; g <= i; g++)
                 code = code * 4 + Index[Sequence[g]];
-            }
-            if (i - badcharindex >= maxtuplesize) {
+
+            if (i - badcharindex >= maxtuplesize)
                 build_entire_code = 0;
-            }
         }
         else {
             code = (code % four_to_the[Tuplesize[NTS] - 1])
                 * 4 + Index[Sequence[i]];
         }
+
         Tuplecode[NTS] = code;
         for (h = NTS - 1; h >= 1; h--) {
             Tuplecode[h] = code % four_to_the[Tuplesize[h]];
@@ -3802,7 +3629,7 @@ void newtupbo(void)
         /* process index i using all the tuplesizes */
 
         g = 1;
-        while ((g <= NTS) && (i - badcharindex >= Tuplesize[g])) {
+        while (g <= NTS && i - badcharindex >= Tuplesize[g]) {
 
             /* change 5/25/99 ends here */
 
@@ -3810,14 +3637,12 @@ void newtupbo(void)
                                              * occurrence of code */
             h = Nextfreehistoryindex[g];    /* next free index in history list */
             j = h + 1;          /* advance next free index */
+
             if (j == Historysize[g])
                 j = 1;          /* we use a circular history list */
 
-            if ((History[g][j].location != 0)   /* if the next entry has
-                                                 * already been used */
-                &&(j == Tuplehash[g][History[g][j].code])) {    /* check Tuplehash.
-                                                                 * If it still */
-                /* points here, */
+            if ((History[g][j].location != 0)   /* if the next entry has already been used */
+            && j == Tuplehash[g][History[g][j].code]) {    /* check Tuplehash.  * If it still points here, */
                 Tuplehash[g][History[g][j].code] = 0;   /* zero it out.   */
 
             }
@@ -3830,8 +3655,7 @@ void newtupbo(void)
 
             yy = h;             /* yy holds entry which points to y */
             while (y != 0) {
-                d = i - History[g][y].location; /* d=distance between matching
-                                                 * tuples */
+                d = i - History[g][y].location; /* d=distance between matching tuples */
                 if (d > Tuplemaxdistance[g]) {  /* if d exceeds Tuplemaxdistance,
                                                  * then */
                     /* make the previous location 0.  We */
@@ -3912,7 +3736,6 @@ void newtupbo(void)
 
                                 }
                                 else {
-
                                     pass_multiples_test = multiples_criteria_4(d);
                                     add_to_bestperiodlist(d);
                                     if (pass_multiples_test) {
@@ -3933,9 +3756,10 @@ void newtupbo(void)
                                         }
                                         else {  /* d is a large distance */
                                             narrowbandwrap(i, Classlength,
-                                                max(MINBANDRADIUS, d_range(Classlength)), min(2 * max(MINBANDRADIUS,
-                                                        d_range(Classlength)), (Classlength / 3)), WITHCONSENSUS,
-                                                RECENTERCRITERION);
+                                                max(MINBANDRADIUS, d_range(Classlength)),
+                                                min(2 * max(MINBANDRADIUS, d_range(Classlength)), (Classlength / 3)),
+                                                WITHCONSENSUS, RECENTERCRITERION);
+
                                             Cell_count[Classlength] +=
                                                 (Rows * (2 * max(MINBANDRADIUS, d_range(Classlength)) + 1));
                                             get_narrowband_pair_alignment_with_copynumber(Classlength,
@@ -3961,28 +3785,23 @@ void newtupbo(void)
                                             /*  max(1.9,(double)Min_Distance_Window/(double)Classlength)) */
                                         {
                                         }
-                                        else {
-                                            if ((Classlength >= Minsize) && (AlignPair.score >= Minscore)) {
+                                        else if (Classlength >= Minsize && AlignPair.score >= Minscore) {
+                                            /* output repeat */
+                                            OUTPUTcount++;
+                                            Outputsize_count[Classlength]++;
 
-                                                /* output repeat */
-                                                OUTPUTcount++;
-                                                Outputsize_count[Classlength]++;
-                                                /* sequence */
-                                                trf_message("\nFound at i:%d original size:%d final size:%d",
-                                                    i, d, Classlength);
-                                                get_statistics(Classlength);
-                                            }
-
+                                            /* sequence */
+                                            trf_message("\nFound at i:%d original size:%d final size:%d", i, d, Classlength);
+                                            get_statistics(Classlength);
                                         }
-
                                     }
-
                                 }
                             }
                         }
                     }
                 }
             }
+
             g++;
         }
     }
@@ -3996,4 +3815,3 @@ void newtupbo(void)
     free(Bandcenter);
 }
 
-#endif
