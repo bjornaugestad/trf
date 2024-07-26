@@ -50,12 +50,10 @@ const char *usage = "\n\nPlease use: %s File Match Mismatch Delta PM PI Minscore
     "\n        -r        no redundancy elimination"
     "\n        -l <n>    maximum TR length expected (in millions) (eg, -l 3 or -l=3 for 3 million)"
     "\n                  Human genome HG38 would need -l 6"
-#if (defined(UNIXGUI)+defined(UNIXCONSOLE))>=1
     "\n        -ngs      more compact .dat output on multisequence files, returns 0 on success."
     "\n                  Output is printed to the screen, not a file. You may pipe input in with"
     "\n                  this option using - for file name. Short 50 flanks are appended to .dat"
     "\n                  output."
-#endif
     "\n"
     "\nSee more information on the TRF Unix Help web page: https://tandem.bu.edu/trf/trf.unix.help.html"
     "\n"
@@ -104,7 +102,6 @@ int main(int ac, char **av)
     paramset.redundoff = 0;
     paramset.maxwraplength = 2000000;
     paramset.ngs = 0;           /* this is for unix systems only */
-    paramset.guihandle = 0;
 
     /* Parse command line options */
     /* Assume that since the first checks were passed, options start at argument 8
@@ -121,11 +118,9 @@ int main(int ac, char **av)
             { "flank", no_argument, &paramset.flankingsequence, 1 },    /* -f, -F */
             { "html-off", no_argument, &paramset.HTMLoff, 1 },  /* -h, -H */
             { "redund-off", no_argument, &paramset.redundoff, 1 },  /* -r, -R */
-#if (defined(UNIXGUI)+defined(UNIXCONSOLE))>=1
             { "ngs", no_argument, &paramset.ngs, 1 },   /* -ngs */
             { "Ngs", no_argument, &paramset.ngs, 1 },   /* -Ngs */
             { "NGS", no_argument, &paramset.ngs, 1 },   /* -NGS */
-#endif
             { "maxlength", required_argument, 0, 'l' }, /* -l, -L */
             { 0, 0, 0, 0 }
         };

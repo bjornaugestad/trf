@@ -1,3 +1,5 @@
+#ifndef TR30DAT_H
+#define TR30DAT_H
 
 /*
 Tandem Repeats Finder
@@ -24,8 +26,6 @@ License along with TRF.  If not, see <https://www.gnu.org/licenses/>.
 /* This is a version which contains the narrow band alignment routines
    narrowbnd.c, prscores.c, pairalign.c */
 
-#ifndef TR30DAT_H
-#define TR30DAT_H
 
 /* These declarations moved by Yevgeniy Gelfand on Jan 27, 2010  */
 
@@ -36,25 +36,10 @@ int counterInSeq = 0;
 
 /* uncomment only one platform target identifier */
 
-//#define UNIXCONSOLE
-//#define UNIXGUI
-
-
-#if __unix__
 #define UNIXCONSOLE
-#endif
 
 #ifdef UNIXCONSOLE
 #define _MAX_PATH 260
-#elif defined( UNIXGUI )
-
-/* it is possible to do a windows GTK+ version */
-// TODO: fix these very short lengths. boa@20240726
-#define _MAX_PATH 260           /* max. length of full pathname */
-#define _MAX_DIR 260            /* max. length of path component */
-#define _MAX_FNAME 260          /* max. length of file name component */
-#define _MAX_EXT 260            /* max. length of extension component */
-
 #endif
 
 /* all include  libraries */
@@ -73,12 +58,9 @@ int counterInSeq = 0;
 #define versionstring PACKAGE_VERSION
 #endif
 
-#ifndef UNIXGUI
-
-/* alredy defined in glib, used in unix graphical version */
+// TODO: Replace with true and false. boa@20240726
 #define TRUE 1
 #define FALSE 0
-#endif
 
 #define WEIGHTCONSENSUS 0
 #define REPEATCONSENSUS 0
@@ -227,7 +209,6 @@ int Test;
 double Rows;
 double Totalcharacters;
 
-/* int Lookcount;*/
 int Wrapend;
 int Maxrealrow, Maxrow, Maxcol;
 int Maxscore;
@@ -252,12 +233,6 @@ struct cons_data {
         insert[2 * (MAXPATTERNSIZECONSTANT + 1)],
         letters[2 * (MAXPATTERNSIZECONSTANT + 1)], total[2 * (MAXPATTERNSIZECONSTANT + 1)];
 } Consensus;
-
-/* int Up[MAXPATTERNSIZE+1], Diag[MAXPATTERNSIZE+1];*/
-
-/*******************************************/
-
-/*** new program started 11-29-95 **********/
 
 struct bestperiodlistelement {
     int indexhigh;
@@ -310,8 +285,6 @@ struct distancelistelement {
     int accepted;
     struct distancelistelement *next;
 } Distanceseenlist[1];
-
-/*******************************************/
 
 /* macros */
 
@@ -391,7 +364,6 @@ typedef struct {
     int multisequencefile;      /* flags if file has more than one sequence */
     int sequenceordinal;        /* holds seq. index starting on 1 */
     int outputcount;            /* repeats found */
-    int guihandle;              /* this variable is only used in the GUI version */
     int running;
     char *endstatus;
     int percent;
@@ -399,12 +371,7 @@ typedef struct {
 
 TRFPARAMSET paramset;           /* this global controls the algorithm */
 
-/* G. Benson */
-
-/* 1/26/10 */
-
-/* change MAXWRAPLENGTH to MAXWRAPLENGTHCONST so MAXWRAPLENGTH can be used as an
- * int */
+/* change MAXWRAPLENGTH to MAXWRAPLENGTHCONST so MAXWRAPLENGTH can be used as an int */
 
 /* int Bandcenter[MAXWRAPLENGTH+1]; */
 int *Bandcenter = NULL;
@@ -434,7 +401,7 @@ int Maxrealcol;
 
 /* new for 2Anewt */
 
-int four_to_the[] = {
+static const int four_to_the[] = {
     1, 4, 16, 64, 256, 1024, 4096, 16384, 65536, 262144, 1048576
 };
 
@@ -446,16 +413,18 @@ int NTS;
 int Tuplesize[MAXTUPLESIZES + 1];
 int Tuplemaxdistance[MAXTUPLESIZES + 1];
 
-int Tuplecode[MAXTUPLESIZES + 1];   /* this is where the actual tuple codes
-                                     * encountered at a sequence location
-                                     * are stored. */
+/* this is where the actual tuple codes encountered
+ * at a sequence location * are stored. */
+int Tuplecode[MAXTUPLESIZES + 1];   
 
-int *Tuplehash[MAXTUPLESIZES + 1];  /* points to last location of code
-                                     * in history list */
+/* points to last location of code in history list */
+int *Tuplehash[MAXTUPLESIZES + 1];  
 
-int Historysize[MAXTUPLESIZES + 1]; /* size of history lists */
+/* size of history lists */
+int Historysize[MAXTUPLESIZES + 1]; 
 
-int Nextfreehistoryindex[MAXTUPLESIZES + 1];    /*next free location in history index */
+/* next free location in history index */
+int Nextfreehistoryindex[MAXTUPLESIZES + 1];
 
 struct historyentry {
     int location, previous, code;

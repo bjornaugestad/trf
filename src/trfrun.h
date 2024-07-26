@@ -101,16 +101,8 @@ void PrintError(char *errortext);
 void PrintProgress(char *progresstext);
 void SetProgressBar(void);
 
-#ifdef UNIXGUI
-extern void set_progress_bar(double fraction);
-#endif
-
-/***********************************************
- *   This routine can act on a multiple-sequence
- *   file and calls TRF() routine as many times
- *   as it needs to.
- ************************************************/
-
+/* This routine can act on a multiple-sequence file
+ * and calls TRF() routine as many times as it needs to. */
 void TRFControlRoutine(void)
 {
     FILE *srcfp, *outmfp, *destmfp, *destdfp = NULL;
@@ -138,7 +130,6 @@ void TRFControlRoutine(void)
             PrintError(line);
             paramset.endstatus = "Bad filename";
             paramset.running = 0;
-            // return CTRL_BADFNAME;
             return;
         }
     }
@@ -148,13 +139,11 @@ void TRFControlRoutine(void)
         PrintProgress("Loading sequence...");
 
     loadstatus = LoadSequenceFromFileEugene(&seq, srcfp);
-
     if (loadstatus < 0) {
         PrintError("Could not load sequence. Empty file or bad format.");
         paramset.endstatus = "Bad format."; /* ok for now */
         paramset.running = 0;
         fclose(srcfp);
-        // return CTRL_BADFORMAT;
         return;
     }
 
@@ -178,12 +167,10 @@ void TRFControlRoutine(void)
         counterInSeq = 0;
         TRF(&seq);
 
-        if (paramset.endstatus) {
+        if (paramset.endstatus)
             return;
-        }
 
         if (paramset.datafile) {
-
             /* Added by Yevgeniy Gelfand on Jan 27, 2010  */
             /* To have smaller sequences not send results */
             /* to disc to improve performance             */
@@ -201,7 +188,6 @@ void TRFControlRoutine(void)
             }
 
             {
-
                 IL *lpointer;
                 int charcount;
 
@@ -213,10 +199,7 @@ void TRFControlRoutine(void)
                     fprintf(destdfp, "Version %s\n", versionstring);
                 }
 
-                //fprintf(destdfp,"\n\n%s%s",hsequence, hparameters);
-
                 if (paramset.ngs) {
-
                     /* only print if we have at least 1 record */
                     if (NULL != GlobalIndexList) {
                         fprintf(destdfp, "@%s\n", seq.name);
@@ -257,22 +240,17 @@ void TRFControlRoutine(void)
                         }
 
                         fprintf(destdfp, " ");
-                        if (lpointer->last == Length) {
+                        if (lpointer->last == Length)
                             fprintf(destdfp, ".");
-                        }
-                        else {
+                        else
                             for (charcount = lpointer->last + 1; charcount <= flankend; charcount++)
                                 fprintf(destdfp, "%c", Sequence[charcount]);
-                        }
-
                     }
 
                     fprintf(destdfp, "\n");
                     ++tr_count;
                 }
-
             }
-
         }
 
         /* masked file moved here so Sequence is not "ruined" by Ns for .dat output */
@@ -303,10 +281,10 @@ void TRFControlRoutine(void)
     paramset.multisequencefile = 1;
     paramset.sequenceordinal = 1;
 
-    /*********************************************************
+    /*
      *   if there are more files need to produce sumary-style
      *   output.
-     **********************************************************/
+     */
 
     /* generate the parameter string to be used in file names */
     sprintf(paramstring, "%d.%d.%d.%d.%d.%d.%d",
@@ -376,16 +354,14 @@ void TRFControlRoutine(void)
             "<TD WIDTH=80><CENTER>Number of\nRepeats</CENTER></TD>" "</TR>\n");
     }
 
-    /******************************************
-     *   process every sequence in file
-     *******************************************/
+    // process every sequence in file
     i = 1;
     for (;;) {
 
         sprintf(hsequence, "Sequence: %s\n", seq.name);
         sprintf(hlength, "Length:  %d", seq.length);
 
-        /* set the prefix to be used for naming of output */
+        // set the prefix to be used for naming of output
         sprintf(input, "%s.s%d", prefix, i);
         strcpy(paramset.inputfilename, input);
         strcpy(paramset.outputprefix, input);
@@ -400,7 +376,6 @@ void TRFControlRoutine(void)
             /* To have smaller sequences not send results */
             /* to disc to improve performance             */
             {
-
                 IL *lpointer;
                 int charcount;
 
@@ -415,15 +390,11 @@ void TRFControlRoutine(void)
                     }
                 }
 
-                //fprintf(destdfp,"\n\n%s%s",hsequence, hparameters);
-
                 if (paramset.ngs) {
-
                     /* only print if we have at least 1 record */
                     if (NULL != GlobalIndexList) {
                         fprintf(destdfp, "@%s\n", seq.name);
                     }
-
                 }
                 else {
                     fprintf(destdfp, "\n\nSequence: %s\n\n\n\nParameters: %d %d %d %d %d %d %d\n\n\n",
@@ -466,14 +437,11 @@ void TRFControlRoutine(void)
                             for (charcount = lpointer->last + 1; charcount <= flankend; charcount++)
                                 fprintf(destdfp, "%c", Sequence[charcount]);
                         }
-
                     }
 
                     fprintf(destdfp, "\n");
                 }
-
             }
-
         }
 
         if (!paramset.HTMLoff) {
@@ -537,7 +505,6 @@ void TRFControlRoutine(void)
                 PrintProgress("Loading sequence file...");
 
             loadstatus = LoadSequenceFromFileEugene(&seq, srcfp);
-
             paramset.sequenceordinal++;
             i++;
         }
@@ -559,6 +526,7 @@ void TRFControlRoutine(void)
     fclose(srcfp);
     if (paramset.maskedfile)
         fclose(destmfp);
+
     if (paramset.datafile)
         fclose(destdfp);
 
@@ -570,14 +538,13 @@ void TRFControlRoutine(void)
 
     paramset.endstatus = NULL;
     paramset.running = 0;
-    // return CTRL_SUCCESS;
     return;
 }
 
-/*************************************************
+/*
  *   This routine acts on single-sequence files and
  *   is used by the control routine above.
- **************************************************/
+ */
 void TRF(FASTASEQUENCE *pseq)
 {
     unsigned int i;             /* used at the end to free memory */
@@ -585,7 +552,6 @@ void TRF(FASTASEQUENCE *pseq)
     char htmlstring[_MAX_PATH], txtstring[_MAX_PATH],
         paramstring[_MAX_PATH], datstring[_MAX_PATH], maskstring[_MAX_PATH], messagebuffer[100];
 
-    /* added Nov 1, 2012 by Y. Gelfand */
     init_bestperiodlist();
 
     /*  Set global print_flanking that controls the generation of flanking */
@@ -596,8 +562,6 @@ void TRF(FASTASEQUENCE *pseq)
         PrintProgress("Allocating Memory...");
 
     /* change made for NGS data analysis */
-    /* G. Benson */
-    /* 1.26.10 */
     /* make MAXWRAPLENGTH = 1000 for smaller for small sequences */
     maxwraplength = min(paramset.maxwraplength, pseq->length);
 
@@ -607,24 +571,18 @@ void TRF(FASTASEQUENCE *pseq)
         PrintError("Unable to allocate memory for S array");
         exit(-1);
     }
-    // stemp = (int *) malloc(((MAXWRAPLENGTH+1)*(MAXBANDWIDTH+1)) * sizeof(int));
-    // memset(stemp,0,((MAXWRAPLENGTH+1)*(MAXBANDWIDTH+1)) * sizeof(int));
+
     /* Yozen Jan 26, 2016: We control the compilation and we're going to be using C99
      * or greater standard C; don't need to cast, and we can use the pointer to determine the size.
      * Also, use calloc instead of malloc+memset. */
-    stemp = calloc(((size_t)(maxwraplength + 1) * (MAXBANDWIDTH + 1)), sizeof(*stemp));
+    stemp = calloc(((size_t)(maxwraplength + 1) * (MAXBANDWIDTH + 1)), sizeof *stemp);
     if (stemp == NULL) {
         char errmsg[255];
 
-#if (__x86_64__ + __x86_64 + __amd64 + __amd64__ + _M_AMD64 + _M_X64) > 1
         snprintf(errmsg, 255,
             "Unable to allocate %lu bytes for stemp array. Please set a lower value for the longest TR length. (%s:%d)\n",
             ((maxwraplength + 1) * (MAXBANDWIDTH + 1)) * sizeof(*stemp), __FILE__, __LINE__);
-#else
-        snprintf(errmsg, 255,
-            "Unable to allocate %u bytes for stemp array. Please set a lower value for the longest TR length. (%s:%d)\n",
-            ((maxwraplength + 1) * (MAXBANDWIDTH + 1)) * sizeof(*stemp), __FILE__, __LINE__);
-#endif
+
         PrintError(errmsg);
         exit(-1);
     }
@@ -637,21 +595,20 @@ void TRF(FASTASEQUENCE *pseq)
     /* AlignPair holds the characters and alignments of the current */
     /* primary and secondary sequences  */
     AlignPair.textprime = newAlignPairtext(2 * maxwraplength);
-    if (paramset.endstatus) {
+    if (paramset.endstatus)
         return;
-    }
+
     AlignPair.textsecnd = newAlignPairtext(2 * maxwraplength);
-    if (paramset.endstatus) {
+    if (paramset.endstatus)
         return;
-    }
+
     AlignPair.indexprime = newAlignPairindex(2 * maxwraplength);
-    if (paramset.endstatus) {
+    if (paramset.endstatus)
         return;
-    }
+    
     AlignPair.indexsecnd = newAlignPairindex(2 * maxwraplength);
-    if (paramset.endstatus) {
+    if (paramset.endstatus) 
         return;
-    }
 
     /* set algorithm's parameters */
     Alpha = paramset.match;

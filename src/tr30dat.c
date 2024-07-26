@@ -24,12 +24,6 @@ License along with TRF.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "tr30dat.h"
 
-/* March 3,1999 removed main to replace with OnStartSearch() . AR */
-
-/* last update May 20 to test multiple tuple sizes */
-
-/* August 12th, 1998  put print alignment headings and print alignment in get statistics */
-
 /* This is a test version which contains the narrow band alignment routines
    narrowbnd.c, prscores.c, pairalgn.c */
 
@@ -143,20 +137,19 @@ if (*pcurr>=maxscore)\
 
 /* start is end of pattern in text */
 /* tuplesize is the size of tuple used for this pattern size */
-/* started Feb. 7 1997 */
 void narrowbandwrap(int start, int size, int bandradius, int bandradiusforward, int option, int tuplesize)
 {
     int g;
-    register int *pup, *pdiag, *pcurr, pleft;
-    int c, realr, end_of_trace, maxscore, maxrow, maxcol, mincol;
+    int pleft;
+    int c, end_of_trace, maxrow, maxcol, mincol;
     int maxrealrow, minrealrow;
     char currchar;
-    int w, matches_in_diagonal, matchatmax_col, i, k, maxrowscore, lastmatchatmax_col, match_yes_no;
+    int matches_in_diagonal, matchatmax_col, i, k, maxrowscore, lastmatchatmax_col, match_yes_no;
 
     int mincolbandcenter, zeroat, mincolposition;
     unsigned int r;
 
-    w = bandradius;
+    int w = bandradius;
     if (MAXBANDWIDTH < 2 * w + 1) {
         trf_message("\nIn narrowbandwrap, MAXBANDWIDTH: %d exceeded by 2*w+1: %d\n", MAXBANDWIDTH, 2 * w + 1);
         exit(-1);
@@ -171,16 +164,16 @@ void narrowbandwrap(int start, int size, int bandradius, int bandradiusforward, 
             EC[g] = Sequence[start - size + g + 1];
 
     /* backward wdp */
-    maxscore = 0;
-    realr = start + 1;
+    int maxscore = 0;
+    int realr = start + 1;
     r = maxwraplength;
     Bandcenter[r] = 0;
     matches_in_diagonal = 0;
     matchatmax_col = -2;
 
-    pcurr = &S[r][0];
-    pdiag = &Diag[0];
-    pup = &Up[0];
+    int *pcurr = &S[r][0];
+    int *pdiag = &Diag[0];
+    int *pup = &Up[0];
 
     /* 3/14/05 gary benson -- reverse direction */
     /* change zeroth row values to put in -1000 in unreachable cells
@@ -229,7 +222,8 @@ void narrowbandwrap(int start, int size, int bandradius, int bandradiusforward, 
             k = -(size - k);
 
         c = (Bandcenter[r] + w) % size;
-        if (k <= -1) {          /* band shifts left */
+        if (k <= -1) {
+            /* band shifts left */
             k = -k;
             pdiag = &Diag[2 * w - k + 1];
             pup = &Up[2 * w - k];
@@ -259,7 +253,8 @@ void narrowbandwrap(int start, int size, int bandradius, int bandradiusforward, 
                 c = (c - 1 + size) % size;
             }
         }
-        else {                  /* band shifts right */
+        else { 
+            /* band shifts right */
             pdiag = &Diag[2 * w];
             pup = &Up[2 * w];
 
@@ -308,7 +303,6 @@ void narrowbandwrap(int start, int size, int bandradius, int bandradiusforward, 
     }
 
     /* forward */
-
     if (ldong == 1)
         return;
 
@@ -316,7 +310,6 @@ void narrowbandwrap(int start, int size, int bandradius, int bandradiusforward, 
     realr = minrealrow - 1;
     /* mincol matches minrealrow in previous alignment above */
 
-    /*** 6/14/05 G. Benson ***/
     /* modification version g */
     Bandcenter[0] = (mincolbandcenter - 1 + size) % size;
     matches_in_diagonal = 0;
@@ -332,12 +325,10 @@ void narrowbandwrap(int start, int size, int bandradius, int bandradiusforward, 
 
     /* initialize top row */
 
-    /*** 6/14/05 G. Benson ***/
     /* set zero at mincol, not at bandcenter, which is now mincolbandcenter,
      * so that forward alignment starts out the same as backwards alignment ended. */
     zeroat = mincolposition - w;
 
-    /* July 9, 20009, G. Benson */
     /* widening the narrowband in the forward direction to catch alignments that don't return to correct start column */
     w = bandradiusforward;
 
@@ -347,7 +338,6 @@ void narrowbandwrap(int start, int size, int bandradius, int bandradiusforward, 
         exit(-1);
     }
 
-    /*** 6/14/05 G. Benson restore what was in all earlier versions ***/
     for (i = 0; i < w + zeroat; i++) {
         *pup = (*pdiag = (*pcurr = -1000)) + Delta;
         pup++;
@@ -355,10 +345,7 @@ void narrowbandwrap(int start, int size, int bandradius, int bandradiusforward, 
         pcurr++;
     }
 
-    /*** 6/9/05 G. Benson ***/
     for (i = w + zeroat; i <= 2 * w; i++) {
-
-        /*** 6/9/05 G. Benson ***/
         *pup = (*pdiag = (*pcurr = 0 + Delta * (i - (w + zeroat)))) + Delta;
         pup++;
         pdiag++;
@@ -367,7 +354,7 @@ void narrowbandwrap(int start, int size, int bandradius, int bandradiusforward, 
 
     /* compute until end of trace */
     end_of_trace = FALSE;
-    while ((!end_of_trace) && (realr < Length) && (r < maxwraplength)) {
+    while (!end_of_trace && realr < Length && r < maxwraplength) {
         r++;
         realr++;
         Rows++;
@@ -414,6 +401,7 @@ void narrowbandwrap(int start, int size, int bandradius, int bandradiusforward, 
             test_maxrowscore_with_match;
             pcurr++;
             c = (c + 1) % size;
+
             for (i = 2 * w - k + 2; i <= 2 * w; i++) {
                 pleft = (*pcurr = max2(0, pleft)) + Delta;
                 test_trace_and_forward_maxscore;
@@ -488,7 +476,7 @@ void narrowbandwrap(int start, int size, int bandradius, int bandradiusforward, 
 void newwrap(int start, int size, int consensuspresent)
 {
     int g;
-    register int *pup, *pdiag, *pcurr, pleft;
+    int *pup, *pdiag, *pcurr, pleft;
     int adjlength, adjmone, c, realr, end_of_trace, maxscore, minrow, maxrow, maxcol, modstart, maxrealrow;
     char currchar;
 
@@ -550,7 +538,6 @@ void newwrap(int start, int size, int consensuspresent)
         for (c = adjlength; c >= 0; c--) {
             *pup = (pleft = (*pcurr = max4(0, *pdiag, *pup, pleft)) + Delta);
             if ((realr <= start - max(size, Min_Distance_Window)) && (*pcurr == 0))
-                /* if (*pcurr==0) doesn't work with consensus */
                 *pup = pleft = *pcurr = -1000;
             else
                 end_of_trace = FALSE;
@@ -560,6 +547,7 @@ void newwrap(int start, int size, int consensuspresent)
                 maxscore = *pcurr;
                 minrow = realr;
             }
+
             pcurr--;
             pdiag--;
             pup--;
@@ -656,14 +644,15 @@ void newwrap(int start, int size, int consensuspresent)
     /* redo for an accurate alignment if score is big enough to report */
     Reportmin = 0;
     if (maxscore >= Reportmin) {
-
         r = 0;
         modstart = start + 1;
         realr = minrow - size - 1;  /* go back at least one additional pattern */
-        if (realr < 0)
-            realr = 0;          /* length in case of misalignment in */
-        /* backwards scan due to starting with */
+
+        /* length in case of misalignment in backwards scan due to starting with */
         /* maxscore in every column */
+        if (realr < 0)
+            realr = 0;          
+
         maxscore = 0;
 
         pup = Up;
@@ -699,8 +688,9 @@ void newwrap(int start, int size, int consensuspresent)
                 pup++;
             }
 
-            end_of_trace = TRUE;    /* setup for encountering a break in the trace */
+            /* setup for encountering a break in the trace */
             /*second pass */
+            end_of_trace = TRUE;    
             pcurr = &S[r][0];
 
             /* pleft set from first pass */
@@ -708,10 +698,8 @@ void newwrap(int start, int size, int consensuspresent)
             pup = &Up[0];
             for (c = 0; c < size; c++) {
                 *pup = (pleft = (*pcurr = max4(0, *pdiag, *pup, pleft)) + Delta);
-                if ((realr >= modstart)
-                    && (*pcurr == 0)) {
+                if (realr >= modstart && *pcurr == 0)
                     *pup = pleft = *pcurr = -1000;
-                }
                 else
                     end_of_trace = FALSE;
 
@@ -769,62 +757,48 @@ void free_bestperiodlist(void)
     }
 }
 
-/*** modified 6/2/05 G. Benson ***/
+/* when distance is 1, no Sortmultiples are defined due 
+ * to change in multiples_criteria_4 */
 void add_to_bestperiodlist(int d)
 {
-    struct bestperiodlistelement *ptr;
+    if (d == 1)
+        return;
 
-    /*** added 6/2/05 G. Benson***/
-    /* when distance is 1, no Sortmultiples are defined due to change in multiples_criteria_4 */
-    if (d != 1) {
-
-        ptr = calloc(1, sizeof *ptr);
-        if (ptr == NULL) {
-            trf_message("\nAdd_to_bestperiodlist: Out of memory!");
-            exit(-1);
-        }
-
-        ptr->indexlow = AlignPair.indexprime[AlignPair.length];
-        ptr->indexhigh = AlignPair.indexprime[1];
-
-        /*** G. Benson 6/2/05 fixed bug using Sortmultiples 1-5 instead of 0-4  ***/
-        ptr->best1 = Sortmultiples[0];
-        ptr->best2 = Sortmultiples[1];
-        ptr->best3 = Sortmultiples[2];
-        ptr->best4 = Sortmultiples[3];
-        ptr->best5 = Sortmultiples[4];
-        ptr->next = Bestperiodlist->next;
-        Bestperiodlist->next = ptr;
+    struct bestperiodlistelement *ptr = calloc(1, sizeof *ptr);
+    if (ptr == NULL) {
+        trf_message("\nAdd_to_bestperiodlist: Out of memory!");
+        exit(-1);
     }
+
+    ptr->indexlow = AlignPair.indexprime[AlignPair.length];
+    ptr->indexhigh = AlignPair.indexprime[1];
+
+    ptr->best1 = Sortmultiples[0];
+    ptr->best2 = Sortmultiples[1];
+    ptr->best3 = Sortmultiples[2];
+    ptr->best4 = Sortmultiples[3];
+    ptr->best5 = Sortmultiples[4];
+    ptr->next = Bestperiodlist->next;
+    Bestperiodlist->next = ptr;
 }
 
-/*** modified 6/2/05 G. Benson ***/
+/* shortens length of best period entry if the consensus alignment
+ * turns out to be shorter than the first alignment; similar
+ * to distanceseen */
 void adjust_bestperiod_entry(int d)
-    /* shortens length of best period entry if the consensus alignment
-     * turns out to be shorter than the first alignment; similar
-     * to distanceseen */
 {
     struct bestperiodlistelement *ptr;
 
-    /*** added 6/2/05 G. Benson***/
-    /* when distance is 1, no Sortmultiples are defined due to change in multiples_criteria_4 */
+    /* when distance is 1, no Sortmultiples are defined due 
+     * to change in multiples_criteria_4 */
     if (d != 1) {
-
         ptr = Bestperiodlist->next;
         if (ptr->indexhigh > AlignPair.indexprime[1])
             ptr->indexhigh = AlignPair.indexprime[1];
-
     }
 }
 
-/**********************************************************/
-
-/**********************************************************/
-
 /* difference plus/minus 5 percent of smaller */
-
-/* +/- 1 percent*/
-#define XYZ(a,b) ((a>b)?(a-b)<=(0.01*b):(b-a)<=(0.01*a))
 
 int search_for_range_in_bestperiodlist(int start, int distance)
     /* returns true if
@@ -850,29 +824,19 @@ int search_for_range_in_bestperiodlist(int start, int distance)
         }
         else {
             /* this specifies how much must be bracketed */
-            if ((entry->indexlow <= start - 2 * distance + 1 + Distance[distance].waiting_time_criteria)
-                && (entry->indexhigh >= start) /*&&(entry->indexhigh-entry->indexlow<=3*distance) */ ) {
+            if (entry->indexlow <= start - 2 * distance + 1 + Distance[distance].waiting_time_criteria
+            && entry->indexhigh >= start) {
                 range_covered = TRUE;
 
-                if ((entry->best1 == distance)
-                    || (entry->best2 == distance)
-                    || (entry->best3 == distance)
-                    || (entry->best4 == distance)
-                    || (entry->best5 == distance))
+                if (entry->best1 == distance
+                || entry->best2 == distance
+                || entry->best3 == distance
+                || entry->best4 == distance
+                || entry->best5 == distance)
                     return TRUE;
-
-                /* change 1 */
-                /*
-                 *
-                 * if(XYZ(entry->best1,distance)
-                 * ||XYZ(entry->best2,distance)
-                 * ||XYZ(entry->best3,distance)
-                 * ||XYZ(entry->best4,distance)
-                 * ||XYZ(entry->best5,distance)) return(TRUE);
-                 */
-
             }
         }
+
         /* go to next entry */
         entrylast = entry;
         entry = entry->next;
@@ -881,11 +845,9 @@ int search_for_range_in_bestperiodlist(int start, int distance)
         return TRUE;
     else
         return FALSE;
-
 }
 
 void init_distanceseenarray(void)
-    /* created 5/23/05 G. Benson */
 {
     Distanceseenarray = calloc(MAXDISTANCECONSTANT + 1, sizeof *Distanceseenarray);
     if (Distanceseenarray == NULL) {
@@ -899,7 +861,6 @@ void free_distanceseenarray(void)
     free(Distanceseenarray);
 }
 
-/* created 5/23/05 G. Benson */
 /* adds the extent of an alignment (end) at the given distance
  * location and score are not currently used */
 void add_to_distanceseenarray(int location, int distance, int end, int score)
@@ -912,15 +873,11 @@ void add_to_distanceseenarray(int location, int distance, int end, int score)
     ptr->score = score;
 }
 
-/* created 5/23/05 G. Benson */
 /* searches for an alignment with patternsize of distance in the region
  * including start.  True means found and alignment should be blocked. */
 int search_for_distance_match_in_distanceseenarray(int distance, int start)
 {
-    struct distanceseenarrayelement ptr;
-
-    ptr = Distanceseenarray[distance];
-
+    struct distanceseenarrayelement ptr = Distanceseenarray[distance];
     if (ptr.end >= start)
         return TRUE;
     else
@@ -947,7 +904,7 @@ void free_distanceseenlist()
 
 void add_to_distanceseenlist(int location, int distance, int end, int score, int acceptstatus)
 {
-    int changed_from_distance;  /* 3/14/05 */
+    int changed_from_distance;
     struct distancelistelement *ptr, *entry;
 
     ptr = calloc(1, sizeof *ptr);
@@ -965,16 +922,14 @@ void add_to_distanceseenlist(int location, int distance, int end, int score, int
     if (acceptstatus == WITHCONSENSUS /* removed matching d because consensussize may be different */
     && location == entry->index 
     && end <= entry->end 
-    && (distance <= 250 || distance == entry->distance)) {  /* put back d match unless d under 250 */
-        /* don't remove Distanceseenlist element,
-         * but make end=0 so it will be removed by
-         * search_for_distance_in_distanceseenlist
-         * procedure */
+    && (distance <= 250 || distance == entry->distance)) {  
+        /* put back d match unless d under 250 */
+        /* don't remove Distanceseenlist element, but make end=0 so it will
+         * be removed by search_for_distance_in_distanceseenlist procedure */
         entry->end = 0;
 
     }
 
-    /* 3/14/05 */
     if (acceptstatus == WITHCONSENSUS)
         changed_from_distance = entry->distance;
 
@@ -995,8 +950,8 @@ void add_to_distanceseenlist(int location, int distance, int end, int score, int
 
 /* tests for exact same distance or a difference in distance
  * of less equal 2; finding a match means ruling
- * out redoing the alignment with that distance */
-/* later, should include a test based on multiples where the actual
+ * out redoing the alignment with that distance 
+ * later, should include a test based on multiples where the actual
  * score and the theoretical best score (all matches) are compared; if
  * the actual score is close to the theoretical score, then don't redo
  * the alignment */
@@ -1027,15 +982,15 @@ int search_for_distance_match_in_distanceseenlist(int distance, int start)
             else
                 absdiff = entry->distance - distance;
 
-            if (absdiff == 0) {
+            if (absdiff == 0)
                 return TRUE;
-            }
 
-            /* new idea 2/11/05 use an extra field called changed_from_distance to store the old distance
-             * when you have a consensus.  In search_for_distance_on_distanceseen_list, if distance doesn't
-             * match, but is close, say within 5, then also look at changed_from_distance for a match.
-             */
-            else if (absdiff <= 5 && distance == entry->changed_from_distance) {
+            /* new idea 2/11/05 use an extra field called changed_from_distance
+             * to store the old distance when you have a consensus.
+             * In search_for_distance_on_distanceseen_list, if distance doesn't
+             * match, but is close, say within 5, then also look at 
+             * changed_from_distance for a match.  */
+            if (absdiff <= 5 && distance == entry->changed_from_distance) {
                 return TRUE;
             }
         }
@@ -1141,24 +1096,21 @@ else
     break;\
 }
 {
-
     int i, length, fullcopy;
-    unsigned char *x, *y;
-    int realr, r, c, w;
-    int upi, k;
+    int upi;
     int legitimateZero;
 
     if (ldong)                  /* null statement */
         return;
 
-    w = bandradius;
-    x = Sequence;
-    y = EC;
+    int w = bandradius;
+    unsigned char *x = Sequence;
+    unsigned char *y = EC;
 
-    realr = Maxrealrow;
-    r = Maxrow;
-    c = Maxcol;
-    k = (Maxcol - Bandcenter[r] + size) % size;
+    int realr = Maxrealrow;
+    int r = Maxrow;
+    int c = Maxcol;
+    int k = (Maxcol - Bandcenter[r] + size) % size;
     if (size - k <= k)
         k = -(size - k);
     i = w + k;
@@ -1167,6 +1119,7 @@ else
     AlignPair.score = S[r][i];
     length = 0;
     Copynumber = 0;
+
     for (;;) {
         /* stop at zeros or -1000 for local */
         /* stop at r=0 for global */
@@ -1187,22 +1140,21 @@ else
             k = (Bandcenter[r] - Bandcenter[r - 1] + size) % size;
             if (size - k <= k)
                 k = -(size - k);
+
             if (k >= 1) {   /* band shifts right */
                 if (i <= 2 * w - k) {
-                    if ((S[r][i] == S[r - 1][upi - 1] + match(x[realr], y[c]))
-                        || (S[r][i] == S[r - 1][upi] + Delta)
-                        || (S[r][i] == S[r][i - 1] + Delta))
+                    if (S[r][i] == S[r - 1][upi - 1] + match(x[realr], y[c])
+                    || S[r][i] == S[r - 1][upi] + Delta
+                    || S[r][i] == S[r][i - 1] + Delta)
                         legitimateZero = 1;
                 }
                 else if (i == 2 * w - k + 1) {
-                    if ((S[r][i] == S[r - 1][upi - 1] + match(x[realr], y[c]))
-                        || (S[r][i] == S[r][i - 1] + Delta))
+                    if (S[r][i] == S[r - 1][upi - 1] + match(x[realr], y[c])
+                    || S[r][i] == S[r][i - 1] + Delta)
                         legitimateZero = 1;
                 }
-                else {
-                    if (S[r][i] == S[r][i - 1] + Delta)
-                        legitimateZero = 1;
-                }
+                else if (S[r][i] == S[r][i - 1] + Delta)
+                    legitimateZero = 1;
             }
             else {          /* (k<=0) band shifts left */
                 k = -k;
@@ -1211,41 +1163,30 @@ else
                         legitimateZero = 1;
                 }
                 else if (i == k) {
-                    if ((S[r][i] == S[r - 1][upi] + Delta)
-                        || (S[r][i] == S[r][i - 1] + Delta))
+                    if (S[r][i] == S[r - 1][upi] + Delta
+                    || S[r][i] == S[r][i - 1] + Delta)
                         legitimateZero = 1;
                 }
-                else {
-                    if ((S[r][i] == S[r - 1][upi - 1] + match(x[realr], y[c]))
-                        || (S[r][i] == S[r - 1][upi] + Delta)
-                        || (S[r][i] == S[r][i - 1] + Delta))
-                        legitimateZero = 1;
-                }
+                else if (S[r][i] == S[r - 1][upi - 1] + match(x[realr], y[c])
+                || S[r][i] == S[r - 1][upi] + Delta
+                || S[r][i] == S[r][i - 1] + Delta)
+                    legitimateZero = 1;
             }
-            //debug
-            //if (legitimateZero) {
-            //report where
-            //  printf("\nlegitimate zero at r:%d,i:%d",r,i);
-            //}
         }
 
         /* stop at zeros or -1000 for local */
         /* stop at r=0 for global */
-        if (r == 0 || ((option == LOCAL) && (S[r][i] <= 0) && !legitimateZero)
-            || ((option == GLOBAL) && (r == 0) && (c == -1)))
-            //debug (uncomment to restore)
-            /*
-             * if (((option==LOCAL)&&(S[r][i]<=0))||((option==GLOBAL)&&(r==0)&&(c==-1)))
-             */
-        {
+        if (r == 0 || (option == LOCAL && S[r][i] <= 0 && !legitimateZero)
+        || (option == GLOBAL && r == 0 && c == -1)) {
             legitimateZero = 0;
             AlignPair.length = length;
-            if (Maxcol >= c) {
+            if (Maxcol >= c)
                 Copynumber += ((double)(Maxcol - c)) / size;
-            }
-            else {
+            else
                 Copynumber += ((double)(Maxcol + size - c)) / size;
-            } return;
+
+            return;
+            // TODO: Given the return statement above, do we need an else clause? boa
         }
         else {
             k = (c - Bandcenter[r - 1] + size) % size;
@@ -1254,7 +1195,8 @@ else
             upi = w + k;
             /* in case global goes to c==-1 */
             if ((option == GLOBAL) && (c == -1)) {
-            test_up report_error_up}
+                test_up report_error_up
+            }
             else {
                 k = (Bandcenter[r] - Bandcenter[r - 1] + size) % size;
                 if (size - k <= k)
@@ -1312,12 +1254,12 @@ void get_pair_alignment_with_copynumber(int size)
         /* stop at zeros or -1000 */
         if (S[si][j] <= 0) {
             AlignPair.length = length;
-            if (Maxcol >= j) {
+            if (Maxcol >= j) 
                 Copynumber += ((double)(Maxcol - j)) / size;
-            }
-            else {
+            else 
                 Copynumber += ((double)(Maxcol + size - j)) / size;
-            } return;
+
+            return;
         }
 
         /* check match/mismatch branch */
@@ -1357,17 +1299,10 @@ void get_pair_alignment_with_copynumber(int size)
             break;
         }
     }
-
 }
 
-/*******************************************************************/
-
-/**************************  reverse()  ****************************/
-
-/*******************************************************************/
-
+/* reverses the alignment in AlignPair */
 void reverse()
-    /* reverses the alignment in AlignPair */
 {
     int j, tempi, ml;
     char temp;
@@ -1408,17 +1343,11 @@ void shift_pattern_indices(int patternsize)
     }
 }
 
-/*******************************************************************/
-
-/***********************  alt_print_alignment()  ***********************/
-
-/*******************************************************************/
-
+/* change added to make indices run
+ * from 1 to patternsize in the output */
+/* prints out the alignment in AlignPair */
 void alt3_print_alignment(int patternwidth)
-{                               /* change added to make indices run
-                                 * from 1 to patternsize in the
-                                 * output */
-    /* prints out the alignment in AlignPair */
+{
     extern int pwidth;
     int i, j, g, h, first, m;
 
@@ -1429,6 +1358,7 @@ void alt3_print_alignment(int patternwidth)
             m = AlignPair.indexprime[1] - 10;
             if (m < 1)
                 m = 1;
+
             j = m;
             fprintf(Fptxt, "  %9d ", j);
             for (i = 1; i <= 10; i++) {
@@ -1437,8 +1367,10 @@ void alt3_print_alignment(int patternwidth)
                 if (j == AlignPair.indexprime[1])
                     break;
             }
+
             fprintf(Fptxt, "\n\n");
         }
+
         g = 1;
         for (;;) {
             j = g;
@@ -1448,82 +1380,99 @@ void alt3_print_alignment(int patternwidth)
             for (i = 0; i < pwidth - 10; ++i) {
                 if (j == AlignPair.length + 1)
                     break;
-                if ((!first) && (AlignPair.indexsecnd[j] == 0)
-                    && (AlignPair.indexsecnd[j - 1] != 0)) {
-                    if ((patternwidth > 6) || (pwidth - 10 - h < (2 * patternwidth)))
+
+                if (!first && AlignPair.indexsecnd[j] == 0
+                && AlignPair.indexsecnd[j - 1] != 0) {
+                    if (patternwidth > 6 || pwidth - 10 - h < (2 * patternwidth))
                         break;
+
                     fprintf(Fptxt, " ");
                     h++;
                 }
+
                 first = FALSE;
-                if ((AlignPair.textprime[j] != AlignPair.textsecnd[j]) &&
-                    (AlignPair.textprime[j] != '-') && (AlignPair.textsecnd[j] != '-')) {
+                if (AlignPair.textprime[j] != AlignPair.textsecnd[j] 
+                && AlignPair.textprime[j] != '-' 
+                && AlignPair.textsecnd[j] != '-') {
                     fputc('*', Fptxt);
                 }
                 else
                     fputc(' ', Fptxt);
+
                 j++;
                 h++;
             }
+
             fputc('\n', Fptxt);
             j = g;
             fprintf(Fptxt, "  %9d ", AlignPair.indexprime[j]);
             first = TRUE;
             h = 0;
+
             for (i = 0; i < pwidth - 10; ++i) {
                 if (j == AlignPair.length + 1)
                     break;
-                if ((!first) && (AlignPair.indexsecnd[j] == 0)
-                    && (AlignPair.indexsecnd[j - 1] != 0)) {
-                    if ((patternwidth > 6) || (pwidth - 10 - h < (2 * patternwidth)))
+
+                if (!first && AlignPair.indexsecnd[j] == 0
+                && AlignPair.indexsecnd[j - 1] != 0) {
+                    if (patternwidth > 6 || pwidth - 10 - h < (2 * patternwidth))
                         break;
+
                     fprintf(Fptxt, " ");
                     h++;
                 }
+
                 first = FALSE;
                 fputc(AlignPair.textprime[j++], Fptxt);
                 h++;
             }
+
             fputc('\n', Fptxt);
             j = g;
-            fprintf(Fptxt, "  %9d ", AlignPair.indexsecnd[j] + 1);  /* +1 added to make
-                                                                     * indices run from
-                                                                     * 1 to
-                                                                     * patternwidth in
-                                                                     * output */
+
+            /* +1 added to make* indices run from 1 to patternwidth in output */
+            fprintf(Fptxt, "  %9d ", AlignPair.indexsecnd[j] + 1);  
             first = TRUE;
             h = 0;
+
             for (i = 0; i < pwidth - 10; ++i) {
                 if (j == AlignPair.length + 1)
                     break;
-                if ((!first) && (AlignPair.indexsecnd[j] == 0)
-                    && (AlignPair.indexsecnd[j - 1] != 0)) {
-                    if ((patternwidth > 6) || (pwidth - 10 - h < (2 * patternwidth)))
+
+                if (!first && AlignPair.indexsecnd[j] == 0
+                && AlignPair.indexsecnd[j - 1] != 0) {
+                    if (patternwidth > 6 || pwidth - 10 - h < (2 * patternwidth))
                         break;
+
                     fprintf(Fptxt, " ");
                     h++;
                 }
+
                 first = FALSE;
                 fputc(AlignPair.textsecnd[j++], Fptxt);
                 h++;
             }
             fprintf(Fptxt, "\n\n");
             g = j;
+
             if (j == AlignPair.length + 1)
                 break;
         }
+
         if (AlignPair.indexprime[AlignPair.length] != Length) {
             m = AlignPair.indexprime[AlignPair.length] + 10;
             if (m > Length)
                 m = Length;
             j = AlignPair.indexprime[AlignPair.length] + 1;
             fprintf(Fptxt, "  %9d ", j);
+
             for (i = 1; i <= 10; i++) {
                 fputc(Sequence[j], Fptxt);
                 j++;
                 if (j > m)
                     break;
             }
+
             fprintf(Fptxt, "\n\n");
         }
     }
@@ -1534,21 +1483,16 @@ void alt3_print_alignment(int patternwidth)
 void print_alignment_headings(int consensuslength)
 {
     /* headings */
-    if (Heading == 0) {
+    if (Heading == 0)
         Heading = 1;
-    }
+
     fprintf(Fptxt, "\n\n<A NAME=\"%d--%d,%d,%3.1f,%d,%d\">",
         AlignPair.indexprime[1],
         AlignPair.indexprime[AlignPair.length], Period, Copynumber, consensuslength, (int)OUTPUTcount);
     fprintf(Fptxt, "</A>");
 
-#if defined(UNIXGUI)
-    fprintf(Fptxt,
-        "<P>See <FONT COLOR=\"#0000FF\">Alignment Explanation</FONT> in Tandem Repeats Finder Help</P><BR>\n");
-#elif defined(UNIXCONSOLE)
     fprintf(Fptxt,
         "<A HREF=\"http://tandem.bu.edu/trf/trf.definitions.html#alignment\" target =\"explanation\">Alignment explanation</A><BR><BR>\n");
-#endif
 
     fprintf(Fptxt, "    Indices: %d--%d", AlignPair.indexprime[1], AlignPair.indexprime[AlignPair.length]);
     fprintf(Fptxt, "  Score: %d", Maxscore);
