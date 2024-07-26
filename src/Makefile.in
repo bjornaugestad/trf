@@ -103,7 +103,8 @@ CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am_trf_OBJECTS = trf-trf.$(OBJEXT) trf-trfrun.$(OBJEXT) \
-	trf-trfclean.$(OBJEXT)
+	trf-trfclean.$(OBJEXT) trf-tr30dat.$(OBJEXT) \
+	trf-indexlist.$(OBJEXT)
 trf_OBJECTS = $(am_trf_OBJECTS)
 trf_LDADD = $(LDADD)
 trf_LINK = $(CCLD) $(trf_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o \
@@ -123,7 +124,8 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = ./$(DEPDIR)/trf-trf.Po \
+am__depfiles_remade = ./$(DEPDIR)/trf-indexlist.Po \
+	./$(DEPDIR)/trf-tr30dat.Po ./$(DEPDIR)/trf-trf.Po \
 	./$(DEPDIR)/trf-trfclean.Po ./$(DEPDIR)/trf-trfrun.Po
 am__mv = mv -f
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -271,8 +273,8 @@ target_vendor = @target_vendor@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-trf_SOURCES = trf.c trfrun.c trfclean.c
-trf_DEPENDENCIES = tr30dat.c tr30dat.h trf.c trfclean.h trfrun.h
+trf_SOURCES = trf.c trfrun.c trfclean.c tr30dat.c indexlist.c
+trf_DEPENDENCIES = tr30dat.h trf.c trfclean.h trfrun.h indexlist.h
 trf_CFLAGS = -fno-align-functions -fno-align-loops -Wall -Wextra -pedantic -O2
 all: all-am
 
@@ -360,6 +362,8 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/trf-indexlist.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/trf-tr30dat.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/trf-trf.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/trf-trfclean.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/trf-trfrun.Po@am__quote@ # am--include-marker
@@ -425,6 +429,34 @@ trf-trfclean.obj: trfclean.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='trfclean.c' object='trf-trfclean.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(trf_CFLAGS) $(CFLAGS) -c -o trf-trfclean.obj `if test -f 'trfclean.c'; then $(CYGPATH_W) 'trfclean.c'; else $(CYGPATH_W) '$(srcdir)/trfclean.c'; fi`
+
+trf-tr30dat.o: tr30dat.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(trf_CFLAGS) $(CFLAGS) -MT trf-tr30dat.o -MD -MP -MF $(DEPDIR)/trf-tr30dat.Tpo -c -o trf-tr30dat.o `test -f 'tr30dat.c' || echo '$(srcdir)/'`tr30dat.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/trf-tr30dat.Tpo $(DEPDIR)/trf-tr30dat.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='tr30dat.c' object='trf-tr30dat.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(trf_CFLAGS) $(CFLAGS) -c -o trf-tr30dat.o `test -f 'tr30dat.c' || echo '$(srcdir)/'`tr30dat.c
+
+trf-tr30dat.obj: tr30dat.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(trf_CFLAGS) $(CFLAGS) -MT trf-tr30dat.obj -MD -MP -MF $(DEPDIR)/trf-tr30dat.Tpo -c -o trf-tr30dat.obj `if test -f 'tr30dat.c'; then $(CYGPATH_W) 'tr30dat.c'; else $(CYGPATH_W) '$(srcdir)/tr30dat.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/trf-tr30dat.Tpo $(DEPDIR)/trf-tr30dat.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='tr30dat.c' object='trf-tr30dat.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(trf_CFLAGS) $(CFLAGS) -c -o trf-tr30dat.obj `if test -f 'tr30dat.c'; then $(CYGPATH_W) 'tr30dat.c'; else $(CYGPATH_W) '$(srcdir)/tr30dat.c'; fi`
+
+trf-indexlist.o: indexlist.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(trf_CFLAGS) $(CFLAGS) -MT trf-indexlist.o -MD -MP -MF $(DEPDIR)/trf-indexlist.Tpo -c -o trf-indexlist.o `test -f 'indexlist.c' || echo '$(srcdir)/'`indexlist.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/trf-indexlist.Tpo $(DEPDIR)/trf-indexlist.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='indexlist.c' object='trf-indexlist.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(trf_CFLAGS) $(CFLAGS) -c -o trf-indexlist.o `test -f 'indexlist.c' || echo '$(srcdir)/'`indexlist.c
+
+trf-indexlist.obj: indexlist.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(trf_CFLAGS) $(CFLAGS) -MT trf-indexlist.obj -MD -MP -MF $(DEPDIR)/trf-indexlist.Tpo -c -o trf-indexlist.obj `if test -f 'indexlist.c'; then $(CYGPATH_W) 'indexlist.c'; else $(CYGPATH_W) '$(srcdir)/indexlist.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/trf-indexlist.Tpo $(DEPDIR)/trf-indexlist.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='indexlist.c' object='trf-indexlist.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(trf_CFLAGS) $(CFLAGS) -c -o trf-indexlist.obj `if test -f 'indexlist.c'; then $(CYGPATH_W) 'indexlist.c'; else $(CYGPATH_W) '$(srcdir)/indexlist.c'; fi`
 
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique
@@ -552,7 +584,9 @@ clean: clean-am
 clean-am: clean-binPROGRAMS clean-generic mostlyclean-am
 
 distclean: distclean-am
-		-rm -f ./$(DEPDIR)/trf-trf.Po
+		-rm -f ./$(DEPDIR)/trf-indexlist.Po
+	-rm -f ./$(DEPDIR)/trf-tr30dat.Po
+	-rm -f ./$(DEPDIR)/trf-trf.Po
 	-rm -f ./$(DEPDIR)/trf-trfclean.Po
 	-rm -f ./$(DEPDIR)/trf-trfrun.Po
 	-rm -f Makefile
@@ -601,7 +635,9 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-		-rm -f ./$(DEPDIR)/trf-trf.Po
+		-rm -f ./$(DEPDIR)/trf-indexlist.Po
+	-rm -f ./$(DEPDIR)/trf-tr30dat.Po
+	-rm -f ./$(DEPDIR)/trf-trf.Po
 	-rm -f ./$(DEPDIR)/trf-trfclean.Po
 	-rm -f ./$(DEPDIR)/trf-trfrun.Po
 	-rm -f Makefile

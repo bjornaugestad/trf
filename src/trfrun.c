@@ -24,6 +24,7 @@ License along with TRF.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "trfrun.h"
 #include "tr30dat.h"
+#include "indexlist.h"
 
 /* This routine can act on a multiple-sequence file
  * and calls TRF() routine as many times as it needs to. */

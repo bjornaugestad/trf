@@ -1,6 +1,8 @@
 #ifndef TR30DAT_H
 #define TR30DAT_H
 
+#include <stdio.h>
+
 /*
 Tandem Repeats Finder
 Copyright (C) 1999-2020 Gary Benson

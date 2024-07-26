@@ -25,6 +25,10 @@ License along with TRF.  If not, see <https://www.gnu.org/licenses/>.
 #include <math.h>
 
 #include "tr30dat.h"
+#include "indexlist.h"
+#include "trfrun.h"
+
+struct distanceentry *_DistanceEntries;
 
 /* This is a test version which contains the narrow band alignment routines
    narrowbnd.c, prscores.c, pairalgn.c */
@@ -1847,7 +1851,6 @@ void get_consensus(int patternlength)
 
 #endif
 
-struct distanceentry *_DistanceEntries;
 
 struct distancelist *new_distancelist(void)
 {
@@ -2676,18 +2679,18 @@ void get_statistics(int consensussize)
     reverse();
     Period = best_match_distance;
 
-    if (!paramset.HTMLoff)
+    if (!paramset.ps_HTMLoff)
         print_alignment_headings(Classlength);
 
     /* save the starting position of consensus in EC */
     startECpos = (int)AlignPair.indexsecnd[1];
 
-    if (!paramset.HTMLoff)
+    if (!paramset.ps_HTMLoff)
         alt3_print_alignment(Classlength);
 
     reverse();
 
-    if (!paramset.HTMLoff) {
+    if (!paramset.ps_HTMLoff) {
         fprintf(Fptxt, "\nStatistics");
         fprintf(Fptxt, "\nMatches: %d,  Mismatches: %d, Indels: %d", match, mismatch, indel);
         fprintf(Fptxt, "\n        %0.2f            %0.2f        %0.2f",
@@ -2742,7 +2745,7 @@ void get_statistics(int consensussize)
     if (entropy < 0)
         entropy = -entropy;
 
-    if (!paramset.HTMLoff) {
+    if (!paramset.ps_HTMLoff) {
         fprintf(Fptxt, "\n");
         fprintf(Fptxt, "\n");
     }
@@ -2763,13 +2766,13 @@ void get_statistics(int consensussize)
 
     /* prints line showing the consensus pattern */
 
-    if (!paramset.HTMLoff) {
+    if (!paramset.ps_HTMLoff) {
 
         printECtoAlignments(Fptxt, startECpos, consensussize);
 
         if (print_flanking) {
             reverse();
-            print_flanking_sequence(paramset.flankinglength);
+            print_flanking_sequence(paramset.ps_flankinglength);
             reverse();
         }
 
@@ -2779,7 +2782,7 @@ void get_statistics(int consensussize)
     /* to disc to improve performance             */
     {
         /* create new index list element */
-        IL *newptr =  malloc(sizeof *newptr);
+        struct index_list *newptr =  malloc(sizeof *newptr);
         if (newptr == NULL) {
             FreeList(GlobalIndexList);
             GlobalIndexList = NULL;
@@ -2789,30 +2792,30 @@ void get_statistics(int consensussize)
         }
 
         counterInSeq++;
-        newptr->count = counterInSeq;
+        newptr->il_count = counterInSeq;
 
         /* assign data to fields */
-        sprintf(newptr->ref, "%d--%d,%d,%3.1f,%d,%d",
+        sprintf(newptr->il_ref, "%d--%d,%d,%3.1f,%d,%d",
             AlignPair.indexprime[AlignPair.length], AlignPair.indexprime[1], best_match_distance, Copynumber,
             Classlength, (int)OUTPUTcount);
 
-        newptr->first = AlignPair.indexprime[AlignPair.length];
-        newptr->last = AlignPair.indexprime[1];
-        newptr->period = best_match_distance;
-        newptr->copies = Copynumber;
-        newptr->size = Classlength;
-        newptr->matches = (int)(100 * (float)match / x);
-        newptr->indels = (int)(100 * (float)indel / x);
-        newptr->score = AlignPair.score;
-        newptr->acount = (int)(100 * (double)ACGTcount['A' - 'A'] / count);
-        newptr->ccount = (int)(100 * (double)ACGTcount['C' - 'A'] / count);
-        newptr->gcount = (int)(100 * (double)ACGTcount['G' - 'A'] / count);
-        newptr->tcount = (int)(100 * (double)ACGTcount['T' - 'A'] / count);
-        newptr->entropy = entropy;
+        newptr->il_first = AlignPair.indexprime[AlignPair.length];
+        newptr->il_last = AlignPair.indexprime[1];
+        newptr->il_period = best_match_distance;
+        newptr->il_copies = Copynumber;
+        newptr->il_size = Classlength;
+        newptr->il_matches = (int)(100 * (float)match / x);
+        newptr->il_indels = (int)(100 * (float)indel / x);
+        newptr->il_score = AlignPair.score;
+        newptr->il_acount = (int)(100 * (double)ACGTcount['A' - 'A'] / count);
+        newptr->il_ccount = (int)(100 * (double)ACGTcount['C' - 'A'] / count);
+        newptr->il_gcount = (int)(100 * (double)ACGTcount['G' - 'A'] / count);
+        newptr->il_tcount = (int)(100 * (double)ACGTcount['T' - 'A'] / count);
+        newptr->il_entropy = entropy;
 
         /* allocate memory to place the pattern and copy data into it */
-        newptr->pattern = malloc(consensussize + 1);
-        if (newptr->pattern == NULL) {
+        newptr->il_pattern = malloc(consensussize + 1);
+        if (newptr->il_pattern == NULL) {
             free(newptr);
             FreeList(GlobalIndexList);
             GlobalIndexList = NULL;
@@ -2820,18 +2823,18 @@ void get_statistics(int consensussize)
             return;
         }
 
-        printECtoBuffer(newptr->pattern, startECpos, consensussize);
+        printECtoBuffer(newptr->il_pattern, startECpos, consensussize);
 
         if (GlobalIndexList == NULL) {  
             /* first element */
             GlobalIndexList = GlobalIndexListTail = newptr;
-            GlobalIndexListTail->next = NULL;
+            GlobalIndexListTail->il_next = NULL;
         }
         else {
             /* add new element to end of list */
-            GlobalIndexListTail->next = newptr;
+            GlobalIndexListTail->il_next = newptr;
             GlobalIndexListTail = newptr;
-            GlobalIndexListTail->next = NULL;
+            GlobalIndexListTail->il_next = NULL;
         }
 
     }
@@ -3486,8 +3489,8 @@ void newtupbo(void)
     init_sm(Alpha, Beta);
 
     /* set progress indicator to zero  */
-    paramset.percent = 0;
-    if (paramset.ngs != 1)
+    paramset.ps_percent = 0;
+    if (paramset.ps_ngs != 1)
         SetProgressBar();
 
     OUTPUTcount = 0; /* needed to make browser label unique */
@@ -3524,8 +3527,8 @@ void newtupbo(void)
         if (percentincrease == onepercent) {
             percentincrease = 0;
             progbarpos++;
-            paramset.percent = progbarpos;
-            if (paramset.ngs != 1)
+            paramset.ps_percent = progbarpos;
+            if (paramset.ps_ngs != 1)
                 SetProgressBar();
         }
 
@@ -3741,8 +3744,8 @@ void newtupbo(void)
     }
 
     /* close progress indicator */
-    paramset.percent = -1;
-    if (paramset.ngs != 1)
+    paramset.ps_percent = -1;
+    if (paramset.ps_ngs != 1)
         SetProgressBar();
 
     free(Bandcenter);
@@ -3757,7 +3760,7 @@ void trf_message(char *format, ...)
 
     va_start(argp, format);
 
-    if (!paramset.HTMLoff)
+    if (!paramset.ps_HTMLoff)
         vfprintf(Fptxt, format, argp);
 
     va_end(argp);
