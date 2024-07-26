@@ -93,15 +93,15 @@ int main(int ac, char **av)
     }
 
     /* set option defaults */
-    paramset.ps_use_stdin = 0;
-    paramset.ps_datafile = 0;
-    paramset.ps_maskedfile = 0;
-    paramset.ps_flankingsequence = 0;
-    paramset.ps_flankinglength = 500;  /* Currently not user-configurable */
-    paramset.ps_HTMLoff = 0;
-    paramset.ps_redundoff = 0;
-    paramset.ps_maxwraplength = 2000000;
-    paramset.ps_ngs = 0;           /* this is for unix systems only */
+    g_paramset.ps_use_stdin = 0;
+    g_paramset.ps_datafile = 0;
+    g_paramset.ps_maskedfile = 0;
+    g_paramset.ps_flankingsequence = 0;
+    g_paramset.ps_flankinglength = 500;  /* Currently not user-configurable */
+    g_paramset.ps_HTMLoff = 0;
+    g_paramset.ps_redundoff = 0;
+    g_paramset.ps_maxwraplength = 2000000;
+    g_paramset.ps_ngs = 0;           /* this is for unix systems only */
 
     /* Parse command line options */
     /* Assume that since the first checks were passed, options start at argument 8
@@ -113,14 +113,14 @@ int main(int ac, char **av)
         static struct option long_options[] = {
             { "help", no_argument, 0, 'u' },    /* -u, -U */
             { "version", no_argument, 0, 'v' }, /* -v, -V */
-            { "dat", no_argument, &paramset.ps_datafile, 1 },  /* -d, -D */
-            { "mask", no_argument, &paramset.ps_maskedfile, 1 },   /* -m, -M */
-            { "flank", no_argument, &paramset.ps_flankingsequence, 1 },    /* -f, -F */
-            { "html-off", no_argument, &paramset.ps_HTMLoff, 1 },  /* -h, -H */
-            { "redund-off", no_argument, &paramset.ps_redundoff, 1 },  /* -r, -R */
-            { "ngs", no_argument, &paramset.ps_ngs, 1 },   /* -ngs */
-            { "Ngs", no_argument, &paramset.ps_ngs, 1 },   /* -Ngs */
-            { "NGS", no_argument, &paramset.ps_ngs, 1 },   /* -NGS */
+            { "dat", no_argument, &g_paramset.ps_datafile, 1 },  /* -d, -D */
+            { "mask", no_argument, &g_paramset.ps_maskedfile, 1 },   /* -m, -M */
+            { "flank", no_argument, &g_paramset.ps_flankingsequence, 1 },    /* -f, -F */
+            { "html-off", no_argument, &g_paramset.ps_HTMLoff, 1 },  /* -h, -H */
+            { "redund-off", no_argument, &g_paramset.ps_redundoff, 1 },  /* -r, -R */
+            { "ngs", no_argument, &g_paramset.ps_ngs, 1 },   /* -ngs */
+            { "Ngs", no_argument, &g_paramset.ps_ngs, 1 },   /* -Ngs */
+            { "NGS", no_argument, &g_paramset.ps_ngs, 1 },   /* -NGS */
             { "maxlength", required_argument, 0, 'l' }, /* -l, -L */
             { 0, 0, 0, 0 }
         };
@@ -166,27 +166,27 @@ int main(int ac, char **av)
 
             case 'd':
             case 'D':
-                paramset.ps_datafile = 1;
+                g_paramset.ps_datafile = 1;
                 break;
 
             case 'm':
             case 'M':
-                paramset.ps_maskedfile = 1;
+                g_paramset.ps_maskedfile = 1;
                 break;
 
             case 'f':
             case 'F':
-                paramset.ps_flankingsequence = 1;
+                g_paramset.ps_flankingsequence = 1;
                 break;
 
             case 'h':
             case 'H':
-                paramset.ps_HTMLoff = 1;
+                g_paramset.ps_HTMLoff = 1;
                 break;
 
             case 'r':
             case 'R':
-                paramset.ps_redundoff = 1;
+                g_paramset.ps_redundoff = 1;
                 break;
 
             case 'l':
@@ -197,12 +197,12 @@ int main(int ac, char **av)
                     exit(2);
                 }
 
-                if (ParseUInt(av[8], &paramset.ps_maxwraplength) == 0) {
+                if (ParseUInt(av[8], &g_paramset.ps_maxwraplength) == 0) {
                     fprintf(stderr, "Error while parsing max TR length (option '-L') value\n");
                     PrintBanner();
                     exit(1);
                 }
-                paramset.ps_maxwraplength *= 1e6;
+                g_paramset.ps_maxwraplength *= 1e6;
 
                 break;
 
@@ -216,44 +216,44 @@ int main(int ac, char **av)
     }
 
     /* get input parameters */
-    strcpy(paramset.ps_inputfilename, av[1]);
-    strcpy(paramset.ps_outputprefix, GetNamePartAddress(av[1]));
+    strcpy(g_paramset.ps_inputfilename, av[1]);
+    strcpy(g_paramset.ps_outputprefix, GetNamePartAddress(av[1]));
 
     /* Validate these parameters */
-    if (ParseUInt(av[2], &paramset.ps_match) == 0) {
-        paramset.ps_endstatus = "Error parsing match parameter." " Value must be a positive integer.";
+    if (ParseUInt(av[2], &g_paramset.ps_match) == 0) {
+        g_paramset.ps_endstatus = "Error parsing match parameter." " Value must be a positive integer.";
     }
-    else if (ParseUInt(av[3], &paramset.ps_mismatch) == 0) {
-        paramset.ps_endstatus = "Error parsing mismatch parameter." " Value must be a positive integer.";
+    else if (ParseUInt(av[3], &g_paramset.ps_mismatch) == 0) {
+        g_paramset.ps_endstatus = "Error parsing mismatch parameter." " Value must be a positive integer.";
     }
-    else if (ParseUInt(av[4], &paramset.ps_indel) == 0) {
-        paramset.ps_endstatus = "Error parsing indel parameter." " Value must be a positive integer.";
+    else if (ParseUInt(av[4], &g_paramset.ps_indel) == 0) {
+        g_paramset.ps_endstatus = "Error parsing indel parameter." " Value must be a positive integer.";
     }
-    else if (ParseUInt(av[5], &paramset.ps_PM) == 0) {
-        paramset.ps_endstatus = "Error parsing PM parameter." " Value must be a positive integer.";
+    else if (ParseUInt(av[5], &g_paramset.ps_PM) == 0) {
+        g_paramset.ps_endstatus = "Error parsing PM parameter." " Value must be a positive integer.";
     }
-    else if (ParseUInt(av[6], &paramset.ps_PI) == 0) {
-        paramset.ps_endstatus = "Error parsing PI parameter." " Value must be a positive integer.";
+    else if (ParseUInt(av[6], &g_paramset.ps_PI) == 0) {
+        g_paramset.ps_endstatus = "Error parsing PI parameter." " Value must be a positive integer.";
     }
-    else if (ParseUInt(av[7], &paramset.ps_minscore) == 0) {
-        paramset.ps_endstatus = "Error parsing Minscore parameter." " Value must be a positive integer.";
+    else if (ParseUInt(av[7], &g_paramset.ps_minscore) == 0) {
+        g_paramset.ps_endstatus = "Error parsing Minscore parameter." " Value must be a positive integer.";
     }
-    else if ((ParseUInt(av[8], &paramset.ps_maxperiod) == 0) || (paramset.ps_maxperiod > 2000) || (paramset.ps_maxperiod == 0)) {
-        paramset.ps_endstatus = "Error parsing MaxPeriod parameter." " Value must be between 1 and 2000, inclusive.";
+    else if ((ParseUInt(av[8], &g_paramset.ps_maxperiod) == 0) || (g_paramset.ps_maxperiod > 2000) || (g_paramset.ps_maxperiod == 0)) {
+        g_paramset.ps_endstatus = "Error parsing MaxPeriod parameter." " Value must be between 1 and 2000, inclusive.";
     }
 
     /* Error if any validation failed */
-    if (paramset.ps_endstatus) {
-        printf("%s\n\n", paramset.ps_endstatus);
+    if (g_paramset.ps_endstatus) {
+        printf("%s\n\n", g_paramset.ps_endstatus);
         printf("Please run with -h for help, or visit https://tandem.bu.edu/trf/trf.unix.help.html\n");
         exit(1);
     }
 
-    // paramset.datafile must be set if HTMLoff is set
-    paramset.ps_datafile |= paramset.ps_HTMLoff;
+    // g_paramset.datafile must be set if HTMLoff is set
+    g_paramset.ps_datafile |= g_paramset.ps_HTMLoff;
 
-    if (paramset.ps_ngs == 1) {
-        paramset.ps_datafile = 1;
+    if (g_paramset.ps_ngs == 1) {
+        g_paramset.ps_datafile = 1;
     }
     else {
         PrintBanner();
@@ -261,9 +261,9 @@ int main(int ac, char **av)
 
 #if (defined(UNIXGUI)+defined(UNIXCONSOLE))>=1
     if (0 == strcmp("-", av[1])) {
-        if (paramset.ps_ngs) {
-            paramset.ps_use_stdin = 1;
-            paramset.ps_HTMLoff = 1;
+        if (g_paramset.ps_ngs) {
+            g_paramset.ps_use_stdin = 1;
+            g_paramset.ps_HTMLoff = 1;
         }
         else {
             fprintf(stderr, "\n\nPlease use -ngs flag if piping input into TRF");
@@ -277,14 +277,14 @@ int main(int ac, char **av)
     TRFControlRoutine();
 
     /* Check the status by looking at the output count and the endstatus
-     * members of the paramset struct */
-    if (paramset.ps_outputcount == 0 && !paramset.ps_endstatus) {
+     * members of the g_paramset struct */
+    if (g_paramset.ps_outputcount == 0 && !g_paramset.ps_endstatus) {
         /* If no TRs were found, print informative message to STDERR */
         printf("No TRs found. Exiting...\n");
         return 0;
     }
-    else if (paramset.ps_endstatus) {
-        printf("Error processing input: %s\n", paramset.ps_endstatus);
+    else if (g_paramset.ps_endstatus) {
+        printf("Error processing input: %s\n", g_paramset.ps_endstatus);
         return 1;
     }
     else {

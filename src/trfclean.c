@@ -40,12 +40,12 @@ void TRFClean(const char *alignmentfile, const char *tablefile, int maxsize)
     headptr = RemoveBySize(headptr, maxsize);
     headptr = SortByIndex(headptr);
 
-    if (!paramset.ps_redundoff) 
+    if (!g_paramset.ps_redundoff) 
         headptr = RemoveRedundancy(headptr);
 
     headptr = SortByCount(headptr);
 
-    if (!paramset.ps_HTMLoff) {
+    if (!g_paramset.ps_HTMLoff) {
         CleanAlignments(headptr, alignmentfile);
         BreakAlignments(headptr, alignmentfile);
         OutputHTML(headptr, tablefile, alignmentfile);
@@ -55,7 +55,7 @@ void TRFClean(const char *alignmentfile, const char *tablefile, int maxsize)
     for (i = 0, currptr = headptr; currptr != NULL; i++, currptr = currptr->il_next)
         ;
 
-    paramset.ps_outputcount = i;
+    g_paramset.ps_outputcount = i;
 
     /* To have smaller sequences not send results */
     /* to disc to improve performance             */
@@ -722,7 +722,7 @@ void MakeDataFile(struct index_list *headptr, const char *datafile, int data)
             exit(-1);
         }
 
-        if (paramset.ps_ngs != 1) {
+        if (g_paramset.ps_ngs != 1) {
             fprintf(fp,
                 "Tandem Repeats Finder Program written by:\n\nGary Benson\nProgram in Bioinformatics\nBoston University\nVersion %s\n\n\n%s\n\n\n%s\n\n",
                 versionstring, hsequence, hparameters);

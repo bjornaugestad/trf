@@ -24,7 +24,7 @@ License along with TRF.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 /* to disc to improve performance             */
-int counterInSeq = 0;
+int g_counterInSeq = 0;
 
 /* uncomment only one platform target identifier */
 
@@ -226,12 +226,12 @@ static inline int max3( int a, int b, int c )
 }
 
 /* This function may be called multiple times (for different match/mismatch scores) */
-int *SM = NULL;
+int *g_SM = NULL;
 
 // TODO: Replace with something saner, but note that a and b 
 // differs in types here and there. char or unsigned char.
 // boa@20240726
-#define match( a, b ) ( SM[256 * ( ( a ) ) + ( b )] )
+#define match( a, b ) ( g_SM[256 * ( ( a ) ) + ( b )] )
 
 #define fill_align_pair( c1, c2, l, i, j ) \
     AlignPair.textprime[l]  = c1;          \
@@ -251,10 +251,6 @@ int *Outputsize_count;
 double *Cell_count;
 double Try_waiting_time_count, Fail_waiting_time_count;
 double Cell_total, Wasted_total;
-
-/**********************************************************************/
-
-/* New to 2A */
 
 #define GLOBAL 0
 #define LOCAL 1
@@ -289,7 +285,7 @@ struct paramset {
     int ps_percent;
 };
 
-struct paramset paramset;           /* this global controls the algorithm */
+struct paramset g_paramset;           /* this global controls the algorithm */
 
 /* change MAXWRAPLENGTH to MAXWRAPLENGTHCONST so MAXWRAPLENGTH can be used as an int */
 

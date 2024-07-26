@@ -67,8 +67,8 @@ void init_sm(int match, int mismatch)
 
     /* SM has 256*w56 entries to map MATCH-MISMATCH matrix */
     if (!sm_allocated) {
-        SM = calloc(256 * 256, sizeof *SM);
-        if (SM == NULL) {
+        g_SM = calloc(256 * 256, sizeof *g_SM);
+        if (g_SM == NULL) {
             trf_message("\nInit_sm: Out of memory!");
             exit(-1);
         }
@@ -76,16 +76,16 @@ void init_sm(int match, int mismatch)
     }
 
     /* generate 256x256 into matrix */
-    for (i = 0, currint = SM; i <= 255; i++) {
+    for (i = 0, currint = g_SM; i <= 255; i++) {
         for (j = 0; j <= 255; j++, currint++) {
             *currint = mismatch;
         }
     }
 
-    SM['A' * 256 + 'A'] = match;
-    SM['C' * 256 + 'C'] = match;
-    SM['G' * 256 + 'G'] = match;
-    SM['T' * 256 + 'T'] = match;
+    g_SM['A' * 256 + 'A'] = match;
+    g_SM['C' * 256 + 'C'] = match;
+    g_SM['G' * 256 + 'G'] = match;
+    g_SM['T' * 256 + 'T'] = match;
 }
 
 void init_index(void)
@@ -147,15 +147,16 @@ void narrowbandwrap(int start, int size, int bandradius, int bandradiusforward, 
 {
     int g;
     int pleft;
-    int c, end_of_trace, maxrow, maxcol, mincol = 0;
-    int maxrealrow, minrealrow;
+    int c, end_of_trace, maxrow = 0, maxcol = 0, mincol = 0;
+    int maxrealrow = 0, minrealrow = 0;
     char currchar;
     int matches_in_diagonal, matchatmax_col, i, k, maxrowscore, lastmatchatmax_col, match_yes_no;
 
-    int mincolbandcenter, zeroat, mincolposition;
+    int mincolbandcenter = 0, zeroat, mincolposition = 0;
     unsigned int r;
-
     int w = bandradius;
+
+    (void)mincol; // Just to avoid compiler warnings. TODO: review use. boa
     if (MAXBANDWIDTH < 2 * w + 1) {
         trf_message("\nIn narrowbandwrap, MAXBANDWIDTH: %d exceeded by 2*w+1: %d\n", MAXBANDWIDTH, 2 * w + 1);
         exit(-1);
@@ -489,7 +490,7 @@ void newwrap(int start, int size, int consensuspresent)
 {
     int g;
     int *pup, *pdiag, *pcurr, pleft;
-    int adjlength, adjmone, c, realr, end_of_trace, maxscore, minrow, maxrow, maxcol, modstart, maxrealrow;
+    int adjlength, adjmone, c, realr, end_of_trace, maxscore, minrow = 0, maxrow = 0, maxcol = 0, modstart, maxrealrow = 0;
     char currchar;
 
     /* Feb 16, 2016 Yozen */
@@ -2679,18 +2680,18 @@ void get_statistics(int consensussize)
     reverse();
     Period = best_match_distance;
 
-    if (!paramset.ps_HTMLoff)
+    if (!g_paramset.ps_HTMLoff)
         print_alignment_headings(Classlength);
 
     /* save the starting position of consensus in EC */
     startECpos = (int)AlignPair.indexsecnd[1];
 
-    if (!paramset.ps_HTMLoff)
+    if (!g_paramset.ps_HTMLoff)
         alt3_print_alignment(Classlength);
 
     reverse();
 
-    if (!paramset.ps_HTMLoff) {
+    if (!g_paramset.ps_HTMLoff) {
         fprintf(Fptxt, "\nStatistics");
         fprintf(Fptxt, "\nMatches: %d,  Mismatches: %d, Indels: %d", match, mismatch, indel);
         fprintf(Fptxt, "\n        %0.2f            %0.2f        %0.2f",
@@ -2745,7 +2746,7 @@ void get_statistics(int consensussize)
     if (entropy < 0)
         entropy = -entropy;
 
-    if (!paramset.ps_HTMLoff) {
+    if (!g_paramset.ps_HTMLoff) {
         fprintf(Fptxt, "\n");
         fprintf(Fptxt, "\n");
     }
@@ -2766,13 +2767,13 @@ void get_statistics(int consensussize)
 
     /* prints line showing the consensus pattern */
 
-    if (!paramset.ps_HTMLoff) {
+    if (!g_paramset.ps_HTMLoff) {
 
         printECtoAlignments(Fptxt, startECpos, consensussize);
 
         if (print_flanking) {
             reverse();
-            print_flanking_sequence(paramset.ps_flankinglength);
+            print_flanking_sequence(g_paramset.ps_flankinglength);
             reverse();
         }
 
@@ -2791,8 +2792,8 @@ void get_statistics(int consensussize)
             // TODO: Odd way of dealing with OOM. Replace with exit()? boa
         }
 
-        counterInSeq++;
-        newptr->il_count = counterInSeq;
+        g_counterInSeq++;
+        newptr->il_count = g_counterInSeq;
 
         /* assign data to fields */
         sprintf(newptr->il_ref, "%d--%d,%d,%3.1f,%d,%d",
@@ -3489,8 +3490,8 @@ void newtupbo(void)
     init_sm(Alpha, Beta);
 
     /* set progress indicator to zero  */
-    paramset.ps_percent = 0;
-    if (paramset.ps_ngs != 1)
+    g_paramset.ps_percent = 0;
+    if (g_paramset.ps_ngs != 1)
         SetProgressBar();
 
     OUTPUTcount = 0; /* needed to make browser label unique */
@@ -3527,8 +3528,8 @@ void newtupbo(void)
         if (percentincrease == onepercent) {
             percentincrease = 0;
             progbarpos++;
-            paramset.ps_percent = progbarpos;
-            if (paramset.ps_ngs != 1)
+            g_paramset.ps_percent = progbarpos;
+            if (g_paramset.ps_ngs != 1)
                 SetProgressBar();
         }
 
@@ -3744,8 +3745,8 @@ void newtupbo(void)
     }
 
     /* close progress indicator */
-    paramset.ps_percent = -1;
-    if (paramset.ps_ngs != 1)
+    g_paramset.ps_percent = -1;
+    if (g_paramset.ps_ngs != 1)
         SetProgressBar();
 
     free(Bandcenter);
@@ -3760,7 +3761,7 @@ void trf_message(char *format, ...)
 
     va_start(argp, format);
 
-    if (!paramset.ps_HTMLoff)
+    if (!g_paramset.ps_HTMLoff)
         vfprintf(Fptxt, format, argp);
 
     va_end(argp);
