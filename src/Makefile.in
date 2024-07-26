@@ -102,7 +102,7 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_trf_OBJECTS = trf-trf.$(OBJEXT)
+am_trf_OBJECTS = trf-trf.$(OBJEXT) trf-trfrun.$(OBJEXT)
 trf_OBJECTS = $(am_trf_OBJECTS)
 trf_LDADD = $(LDADD)
 trf_LINK = $(CCLD) $(trf_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o \
@@ -122,7 +122,7 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = ./$(DEPDIR)/trf-trf.Po
+am__depfiles_remade = ./$(DEPDIR)/trf-trf.Po ./$(DEPDIR)/trf-trfrun.Po
 am__mv = mv -f
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -269,7 +269,7 @@ target_vendor = @target_vendor@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-trf_SOURCES = trf.c
+trf_SOURCES = trf.c trfrun.c
 trf_DEPENDENCIES = tr30dat.c tr30dat.h trf.c trfclean.h trfrun.h
 trf_CFLAGS = -fno-align-functions -fno-align-loops -Wall -Wextra -pedantic -O2
 all: all-am
@@ -359,6 +359,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/trf-trf.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/trf-trfrun.Po@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
 	@$(MKDIR_P) $(@D)
@@ -393,6 +394,20 @@ trf-trf.obj: trf.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='trf.c' object='trf-trf.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(trf_CFLAGS) $(CFLAGS) -c -o trf-trf.obj `if test -f 'trf.c'; then $(CYGPATH_W) 'trf.c'; else $(CYGPATH_W) '$(srcdir)/trf.c'; fi`
+
+trf-trfrun.o: trfrun.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(trf_CFLAGS) $(CFLAGS) -MT trf-trfrun.o -MD -MP -MF $(DEPDIR)/trf-trfrun.Tpo -c -o trf-trfrun.o `test -f 'trfrun.c' || echo '$(srcdir)/'`trfrun.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/trf-trfrun.Tpo $(DEPDIR)/trf-trfrun.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='trfrun.c' object='trf-trfrun.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(trf_CFLAGS) $(CFLAGS) -c -o trf-trfrun.o `test -f 'trfrun.c' || echo '$(srcdir)/'`trfrun.c
+
+trf-trfrun.obj: trfrun.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(trf_CFLAGS) $(CFLAGS) -MT trf-trfrun.obj -MD -MP -MF $(DEPDIR)/trf-trfrun.Tpo -c -o trf-trfrun.obj `if test -f 'trfrun.c'; then $(CYGPATH_W) 'trfrun.c'; else $(CYGPATH_W) '$(srcdir)/trfrun.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/trf-trfrun.Tpo $(DEPDIR)/trf-trfrun.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='trfrun.c' object='trf-trfrun.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(trf_CFLAGS) $(CFLAGS) -c -o trf-trfrun.obj `if test -f 'trfrun.c'; then $(CYGPATH_W) 'trfrun.c'; else $(CYGPATH_W) '$(srcdir)/trfrun.c'; fi`
 
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique
@@ -521,6 +536,7 @@ clean-am: clean-binPROGRAMS clean-generic mostlyclean-am
 
 distclean: distclean-am
 		-rm -f ./$(DEPDIR)/trf-trf.Po
+	-rm -f ./$(DEPDIR)/trf-trfrun.Po
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -568,6 +584,7 @@ installcheck-am:
 
 maintainer-clean: maintainer-clean-am
 		-rm -f ./$(DEPDIR)/trf-trf.Po
+	-rm -f ./$(DEPDIR)/trf-trfrun.Po
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

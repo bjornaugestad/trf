@@ -1,5 +1,5 @@
 bin_PROGRAMS = trf
-trf_SOURCES = trf.c
+trf_SOURCES = trf.c trfrun.c
 trf_DEPENDENCIES = tr30dat.c tr30dat.h trf.c trfclean.h trfrun.h
 trf_CFLAGS = -fno-align-functions -fno-align-loops -Wall -Wextra -pedantic -O2
 
