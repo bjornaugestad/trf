@@ -30,7 +30,8 @@ License along with TRF.  If not, see <https://www.gnu.org/licenses/>.
 #include <getopt.h>
 #include <errno.h>              // ERANGE
 #include <limits.h>             // LONG_MIN, LONG_MAX
-#include "trfrun.h"             // paramset struct (via tr30dat.h), others
+#include "trfrun.h"
+#include "tr30dat.h"
 
 const char *usage = "\n\nPlease use: %s File Match Mismatch Delta PM PI Minscore MaxPeriod [options]\n"
     "\nWhere: (all weights, penalties, and scores are positive)"

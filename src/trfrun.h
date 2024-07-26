@@ -27,15 +27,13 @@ License along with TRF.  If not, see <https://www.gnu.org/licenses/>.
 #include <errno.h>
 
 struct index_list;
+struct fastasequence;
 
 
 struct index_list *GlobalIndexList = NULL;
 struct index_list *GlobalIndexListTail = NULL;
 
 void FreeList(struct index_list * headptr);
-
-#include "tr30dat.h"
-#include "trfclean.h"
 
 #ifndef _MAX_PATH
 #define _MAX_PATH 260
@@ -49,7 +47,8 @@ int LoadSequenceFromFileEugene(struct fastasequence * pseq, FILE * fp);    /* ma
 int LoadSequenceFromFileBenson(struct fastasequence * pseq, FILE * fp);    /* old function, uses filepos, 32bit version of this would not process a file over 2GB properly */
 void TRFControlRoutine(void);
 void TRF(struct fastasequence * pseq);
-void PrintError(char *errortext);
+void PrintError(const char *errortext);
+void die(const char *errortext);
 void PrintProgress(char *progresstext);
 void SetProgressBar(void);
 

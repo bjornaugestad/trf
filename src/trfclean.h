@@ -1,3 +1,5 @@
+#ifndef TRFCLEAN_H
+#define TRFCLEAN_H
 
 /*
 Tandem Repeats Finder
@@ -52,13 +54,8 @@ License along with TRF.  If not, see <https://www.gnu.org/licenses/>.
  * Last updated Dec 14,2004
  *****************************************************************/
 
-#ifndef TRFCLEAN_H
-#define TRFCLEAN_H
 
-#include <stdio.h>
-#include <ctype.h>
-
-extern void PrintError(char *errortext);    /* defined in trfrun.h */
+extern void PrintError(const char *errortext);    /* defined in trfrun.h */
 
 /* Global strings to store non-tabulated information in html file */
 char hsequence[256];
@@ -67,10 +64,6 @@ char hlength[256];
 
 /* max # of items in tables for extended output format*/
 #define EO_MAX_TBL 120
-
-/***********************************
- *   Support Procedures Declarations
- ***********************************/
 
 struct index_list *GetList(const char *datafile);
 struct index_list *RemoveBySize(struct index_list * headptr, int maxsize);
@@ -88,7 +81,6 @@ void FreeList(struct index_list * headptr);
 int IntervalOverlap(struct index_list * iptr, struct index_list * jptr);
 int IsRedundant(struct index_list * iptr, struct index_list * jptr);
 void MakeFileName(char *newname, const char *oldname, int tag);
-void OutputHeading(FILE * fp, const char *tablefile, const char *alignmentfile);
 
 void TRFClean(const char *alignmentfile, const char *tablefile, int maxsize);
 

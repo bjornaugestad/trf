@@ -387,15 +387,12 @@ void CleanAlignments(struct index_list *headptr, const char *alignmentfile)
 
     /* open files */
     al_fp = fopen(alignmentfile, "r");
-    if (al_fp == NULL) {
-        PrintError("Unable to open alignment file for reading in CleanAlignments routine!");
-        exit(-1);
-    }
+    if (al_fp == NULL)
+        die("Unable to open alignment file for reading in CleanAlignments routine!");
+    
     tmp_fp = fopen(tempfile, "w");
-    if (tmp_fp == NULL) {
-        PrintError("Unable to open temp file for writing in CleanAlignments routine!");
-        exit(-1);
-    }
+    if (tmp_fp == NULL)
+        die("Unable to open temp file for writing in CleanAlignments routine!");
 
     moving = 1;                 /* starts by moving lines to temporary file */
     currptr = headptr;
@@ -471,10 +468,8 @@ void BreakAlignments(struct index_list *headptr, const char *alignmentfile)
 
     /* get heading lines */
     al_fp = fopen(alignmentfile, "r");
-    if (al_fp == NULL) {
-        PrintError("Unable to open alignment file for reading in BreakAlignments routine!");
-        exit(-1);
-    }
+    if (al_fp == NULL)
+        die("Unable to open alignment file for reading in BreakAlignments routine!");
 
     for (i = 0, headcnt = 0; i < 30; i++) {
         /* find if next line is the "Found at" line */
@@ -492,10 +487,9 @@ void BreakAlignments(struct index_list *headptr, const char *alignmentfile)
         MakeFileName(outfile, alignmentfile, i);
         /* open the file for writing */
         out_fp = fopen(outfile, "w");
-        if (out_fp == NULL) {
-            PrintError("Unable to open output file for writing in BreakAlignments routine!");
-            exit(-1);
-        }
+        if (out_fp == NULL)
+            die("Unable to open output file for writing in BreakAlignments routine!");
+
         /* output heading */
         for (j = 0; j < headcnt; j++)
             fputs(headlns[j], out_fp);
@@ -575,6 +569,20 @@ void MakeFileName(char *newname, const char *oldname, int tag)
     return;
 }
 
+static void OutputHeading(FILE *fp, const char *tablefile, const char *alignmentfile)
+{
+    /* output fixed (old) heading */
+    fprintf(fp,
+        "<HTML><HEAD><TITLE>%s</TITLE><BASE TARGET=\"%s\"></HEAD><BODY bgcolor=\"#FBF8BC\"><BR><PRE>Tandem Repeats Finder Program written by:</PRE><PRE><CENTER>Gary Benson<BR>Program in Bioinformatics<BR>Boston University<BR>Version %s<BR></CENTER>",
+        tablefile, alignmentfile, versionstring);
+    fprintf(fp,
+        "\nPlease cite:\nG. Benson,\n\"Tandem repeats finder: a program to analyze DNA sequences\"\nNucleic Acid Research(1999)\nVol. 27, No. 2, pp. 573-580.\n");
+
+    fprintf(fp, "\n%s", hsequence);
+    fprintf(fp, "%s", hparameters);
+    fprintf(fp, "%s</PRE>\n", hlength);
+}
+
 void OutputHTML(struct index_list *headptr, const char *tablefile, const char *alignmentfile)
 {
     FILE *fp;
@@ -606,10 +614,8 @@ void OutputHTML(struct index_list *headptr, const char *tablefile, const char *a
 
         /* open the file for writing */
         fp = fopen(outfile, "w");
-        if (fp == NULL) {
-            PrintError("Unable to open output file for writing in OutputHTML routine!");
-            exit(-1);
-        }
+        if (fp == NULL)
+            die("Unable to open output file for writing in OutputHTML routine!");
 
         /* output heading */
         OutputHeading(fp, outfile, alignmentfile);
@@ -691,22 +697,6 @@ void OutputHTML(struct index_list *headptr, const char *tablefile, const char *a
     }
 }
 
-void OutputHeading(FILE *fp, const char *tablefile, const char *alignmentfile)
-{
-    /* output fixed (old) heading */
-    fprintf(fp,
-        "<HTML><HEAD><TITLE>%s</TITLE><BASE TARGET=\"%s\"></HEAD><BODY bgcolor=\"#FBF8BC\"><BR><PRE>Tandem Repeats Finder Program written by:</PRE><PRE><CENTER>Gary Benson<BR>Program in Bioinformatics<BR>Boston University<BR>Version %s<BR></CENTER>",
-        tablefile, alignmentfile, versionstring);
-    fprintf(fp,
-        "\nPlease cite:\nG. Benson,\n\"Tandem repeats finder: a program to analyze DNA sequences\"\nNucleic Acid Research(1999)\nVol. 27, No. 2, pp. 573-580.\n");
-
-    fprintf(fp, "\n%s", hsequence);
-    fprintf(fp, "%s", hparameters);
-    fprintf(fp, "%s</PRE>\n", hlength);
-
-    return;
-}
-
 void MakeDataFile(struct index_list *headptr, const char *datafile, int data)
 {
     FILE *fp;
@@ -717,10 +707,8 @@ void MakeDataFile(struct index_list *headptr, const char *datafile, int data)
     /* otherwise delete old file */
     if (data) {
         fp = fopen(datafile, "w");
-        if (fp == NULL) {
-            PrintError("Unable to open output file for writing in MakeDataFile routine!");
-            exit(-1);
-        }
+        if (fp == NULL)
+            die("Unable to open output file for writing in MakeDataFile routine!");
 
         if (g_paramset.ps_ngs != 1) {
             fprintf(fp,
@@ -756,10 +744,8 @@ void MakeMaskedFile(struct index_list *headptr, int masked, unsigned char *Seque
 
     if (masked) {
         fp = fopen(maskfile, "w");
-        if (fp == NULL) {
-            PrintError("Unable to open output file for writing in MakeMaskedFile routine!");
-            exit(-1);
-        }
+        if (fp == NULL)
+            die("Unable to open output file for writing in MakeMaskedFile routine!");
 
         /* Ouput sequence description from global variable to file */
         fprintf(fp, ">%s", &hsequence[10]);

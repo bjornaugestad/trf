@@ -24,6 +24,7 @@ License along with TRF.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "trfrun.h"
 #include "tr30dat.h"
+#include "trfclean.h"
 #include "indexlist.h"
 
 /* This routine can act on a multiple-sequence file
@@ -106,10 +107,8 @@ void TRFControlRoutine(void)
             else {
                 sprintf(destd, "%s.%s.dat", prefix, paramstring);
                 destdfp = fopen(destd, "w");
-                if (destdfp == NULL) {
-                    PrintError("Unable to open data file for writing in TRFControlRoutine routine!");
-                    exit(-1);
-                }
+                if (destdfp == NULL)
+                    die("Unable to open data file for writing in TRFControlRoutine routine!");
             }
 
             {
@@ -220,20 +219,16 @@ void TRFControlRoutine(void)
     sprintf(desth, "%s.%s.summary.html", prefix, paramstring);
     if (!g_paramset.ps_HTMLoff) {
         desthfp = fopen(desth, "w");
-        if (desthfp == NULL) {
-            PrintError("Unable to open summary file for writing in TRFControlRoutine routine!");
-            exit(-1);
-        }
+        if (desthfp == NULL)
+            die("Unable to open summary file for writing in TRFControlRoutine routine!");
     }
 
     /* open masked file if requested */
     if (g_paramset.ps_maskedfile) {
         sprintf(destm, "%s.%s.mask", prefix, paramstring);
         destmfp = fopen(destm, "w");
-        if (destmfp == NULL) {
-            PrintError("Unable to open masked file for writing in TRFControlRoutine routine!");
-            exit(-1);
-        }
+        if (destmfp == NULL)
+            die("Unable to open masked file for writing in TRFControlRoutine routine!");
     }
 
     /* open datafile if requested */
@@ -244,10 +239,8 @@ void TRFControlRoutine(void)
         else {
             sprintf(destd, "%s.%s.dat", prefix, paramstring);
             destdfp = fopen(destd, "w");
-            if (destdfp == NULL) {
-                PrintError("Unable to open data file for writing in TRFControlRoutine routine!");
-                exit(-1);
-            }
+            if (destdfp == NULL)
+                die("Unable to open data file for writing in TRFControlRoutine routine!");
         }
     }
 
@@ -401,10 +394,8 @@ void TRFControlRoutine(void)
             /* recreate the name of the masked sequence file */
             sprintf(outm, "%s.s%d.%s.mask", prefix, i, paramstring);
             outmfp = fopen(outm, "r");
-            if (outmfp == NULL) {
-                PrintError("Unable to open masked file for reading in TRFControlRoutine routine!");
-                exit(-1);
-            }
+            if (outmfp == NULL)
+                die("Unable to open masked file for reading in TRFControlRoutine routine!");
             /* copy until end of file */
             while (1) {
                 a = getc(outmfp);
@@ -492,11 +483,9 @@ void TRF(struct fastasequence *pseq)
     maxwraplength = min(g_paramset.ps_maxwraplength, pseq->length);
 
     /* allocate memory */
-    S = (int **)malloc((maxwraplength + 1) * sizeof(int *));
-    if (S == NULL) {
-        PrintError("Unable to allocate memory for S array");
-        exit(-1);
-    }
+    S = malloc((maxwraplength + 1) * sizeof(int *));
+    if (S == NULL)
+        die("Unable to allocate memory for S array");
 
     /* Yozen Jan 26, 2016: We control the compilation and we're going to be using C99
      * or greater standard C; don't need to cast, and we can use the pointer to determine the size.
@@ -509,8 +498,7 @@ void TRF(struct fastasequence *pseq)
             "Unable to allocate %lu bytes for stemp array. Please set a lower value for the longest TR length. (%s:%d)\n",
             ((maxwraplength + 1) * (MAXBANDWIDTH + 1)) * sizeof(*stemp), __FILE__, __LINE__);
 
-        PrintError(errmsg);
-        exit(-1);
+        die(errmsg);
     }
     for (i = 0; i <= maxwraplength; i++) {
         S[i] = stemp;
@@ -572,10 +560,8 @@ void TRF(struct fastasequence *pseq)
     /* start txt file */
     if (!g_paramset.ps_HTMLoff) {
         Fptxt = fopen(txtstring, "w");
-        if (Fptxt == NULL) {
-            PrintError("Unable to open alignment file for writing in TRF() routine!");
-            exit(-1);
-        }
+        if (Fptxt == NULL)
+            die("Unable to open alignment file for writing in TRF() routine!");
 
         fprintf(Fptxt, "<HTML>");
         fprintf(Fptxt, "<HEAD>");
@@ -617,10 +603,8 @@ void TRF(struct fastasequence *pseq)
     /* over allocate statistics_distance array to prevent spill in alignments
      * with execive insertion counts Jan 07, 2003 */
     Statistics_Distance = calloc(4 * g_MAXDISTANCE, sizeof *Statistics_Distance);
-    if (Statistics_Distance == NULL) {
-        PrintError("Unable to allocate memory for Statistics_Distance array");
-        exit(-3);
-    }
+    if (Statistics_Distance == NULL)
+        die("Unable to allocate memory for Statistics_Distance array");
 
     /* set the sequence pointer. more global vars! */
     Sequence = pseq->sequence - 1;  /* start one character before */
@@ -647,28 +631,20 @@ void TRF(struct fastasequence *pseq)
      * consensus length exceeds MAXDISTANCE after returning from get_consensus(d) */
 
     Criteria_count = calloc(2 * (g_MAXDISTANCE + 1), sizeof *Criteria_count);
-    if (Criteria_count == NULL) {
-        PrintError("Unable to allocate Criteria_count");
-        exit(-4);
-    }
+    if (Criteria_count == NULL)
+        die("Unable to allocate Criteria_count");
 
     Consensus_count = calloc(2 * (g_MAXDISTANCE + 1), sizeof *Consensus_count);
-    if (Consensus_count == NULL) {
-        PrintError("Unable to allocate memory for Consensus_count");
-        exit(-5);
-    }
+    if (Consensus_count == NULL)
+        die("Unable to allocate memory for Consensus_count");
 
     Cell_count = calloc(2 * (g_MAXDISTANCE + 1), sizeof *Cell_count);
-    if (Cell_count == NULL) {
-        PrintError("Unable to allocate memory for Cell_count");
-        exit(-6);
-    }
+    if (Cell_count == NULL)
+        die("Unable to allocate memory for Cell_count");
 
     Outputsize_count = calloc(2 * (g_MAXDISTANCE + 1), sizeof *Outputsize_count);
-    if (Outputsize_count == NULL) {
-        PrintError("Unable to allocate memory for Outputsize_count");
-        exit(-7);
-    }
+    if (Outputsize_count == NULL)
+        die("Unable to allocate memory for Outputsize_count");
 
     if (g_paramset.ps_multisequencefile) {
         sprintf(messagebuffer, "Scanning Sequence %d...", g_paramset.ps_sequenceordinal);
@@ -751,11 +727,19 @@ void TRF(struct fastasequence *pseq)
         PrintProgress("Done.");
 }
 
-void PrintError(char *errortext)
+void PrintError(const char *errortext)
 {
     /* the code here depends on the environment defined above */
     fprintf(stderr, "Error: %s\n", errortext);
 }
+
+__attribute__((noreturn))
+void die(const char *msg)
+{
+    PrintError(msg);
+    exit(EXIT_FAILURE);
+}
+
 
 void PrintProgress(char *progresstext)
 {
