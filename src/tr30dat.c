@@ -802,12 +802,12 @@ void adjust_bestperiod_entry(int d)
 
 /* difference plus/minus 5 percent of smaller */
 
+/* returns true if
+ * 1) an entry brackets the range start-distance to start and
+ * the distance matches one of the first three best periods
+ * 2) no entry brackets the range
+ * returns false otherwise */
 int search_for_range_in_bestperiodlist(int start, int distance)
-    /* returns true if
-     * 1) an entry brackets the range start-distance to start and
-     * the distance matches one of the first three best periods
-     * 2) no entry brackets the range
-     * returns false otherwise */
 {
     struct bestperiodlistelement *entry, *entrylast, *temp;
     int range_covered;
@@ -2765,23 +2765,20 @@ void get_statistics(int consensussize)
         }
 
     }
-    /* end of change, 6/1/99 */
 
-    /* Added by Yevgeniy Gelfand on Jan 27, 2010  */
     /* To have smaller sequences not send results */
     /* to disc to improve performance             */
     {
-
-        IL *newptr;
-
         /* create new index list element */
-        newptr =  malloc(sizeof *newptr);
+        IL *newptr =  malloc(sizeof *newptr);
         if (newptr == NULL) {
             FreeList(GlobalIndexList);
             GlobalIndexList = NULL;
             GlobalIndexListTail = NULL;
             return;
+            // TODO: Odd way of dealing with OOM. Replace with exit()? boa
         }
+
         counterInSeq++;
         newptr->count = counterInSeq;
 
@@ -2836,8 +2833,7 @@ void init_and_fill_coin_toss_stats2000_with_4tuplesizes(void)
 {
     /* generated with the following parameters:
      * 0.800000, 0 0, 4 1, 5 30, 7 160 */
-    /* done */
-    int waitdata80[] = { 0, 18, 18, 18, 18, 18, 18, 18, 18, 18,
+    static const int waitdata80[] = { 0, 18, 18, 18, 18, 18, 18, 18, 18, 18,
         18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 19, 19, 19, 19, 19, 19, 19,
         19, 19, 28, 28, 27, 28, 29, 28, 29, 28, 29, 28, 29, 29, 29, 29, 29, 30,
         29, 29, 29, 30, 29, 30, 30, 30, 30, 30, 30, 30, 30, 30, 31, 31, 31, 31,
@@ -2952,9 +2948,7 @@ void init_and_fill_coin_toss_stats2000_with_4tuplesizes(void)
         67, 68, 66, 67, 67, 68, 66, 68, 67, 67, 68
     };
 
-    /* done */
-
-    int sumdata80[] = { 0, 5, 5, 5, 5, 5, 5,
+    static const int sumdata80[] = { 0, 5, 5, 5, 5, 5, 5,
         5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
         5, 5, 6, 6, 7, 8, 8, 9, 9, 6, 6, 7, 7, 7, 8,
         8, 9, 9, 10, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14,
@@ -3102,8 +3096,7 @@ void init_and_fill_coin_toss_stats2000_with_4tuplesizes(void)
 
     /* generated with the following parameters :
      * 0.750000, 3 1, 4 30, 5 44, 7 160 */
-    /* done */
-    int waitdata75[] = { 0, 15, 15, 15, 15, 15, 15, 15, 15, 15,
+    static const int waitdata75[] = { 0, 15, 15, 15, 15, 15, 15, 15, 15, 15,
         15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
         15, 15, 25, 25, 25, 25, 25, 25, 26, 25, 26, 25, 26, 26, 26, 26, 37, 38,
         39, 38, 38, 39, 39, 39, 40, 40, 40, 40, 40, 41, 41, 40, 41, 41, 40, 41,
@@ -3228,8 +3221,8 @@ void init_and_fill_coin_toss_stats2000_with_4tuplesizes(void)
         100, 100, 101, 100, 100, 99, 100, 98, 100, 99, 100, 101, 100, 101, 103,
         99, 100, 101, 100, 101, 101, 100
     };
-    /* done */
-    int sumdata75[] = { 0, 5, 5, 5, 5, 5,
+
+    static const int sumdata75[] = { 0, 5, 5, 5, 5, 5,
         5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
         6, 6, 7, 7, 8, 8, 9, 9, 10, 6, 6, 7, 7, 8,
         8, 8, 9, 9, 10, 10, 11, 11, 11, 7, 7, 7, 8, 8, 8,
@@ -3376,7 +3369,7 @@ void init_and_fill_coin_toss_stats2000_with_4tuplesizes(void)
     };
 
     int g, d;
-    int *waitdata, *sumdata;
+    const int *waitdata, *sumdata;
 
     /* random walk range */
     trf_message("\nPmatch=%3.2f,Pindel=%3.2f", (float)PM / 100, (float)PI / 100);
@@ -3436,8 +3429,6 @@ void init_and_fill_coin_toss_stats2000_with_4tuplesizes(void)
         exit(-13);
     }
 
-    /* StepFunction(waitdata+1, MAXDISTANCE); */
-
     /* Oct 15, 2018 Yozen: truncate value of MAXDISTANCE to 2000
      * if it exceeds that value, to avoid out-of-bounds crashes here.
      * Arrays are only as large as 2004. This is a temporary change
@@ -3466,13 +3457,10 @@ void init_and_fill_coin_toss_stats2000_with_4tuplesizes(void)
     /* Oct 15, 2018 Yozen: truncate value of MAXDISTANCE to 2000 */
     for (d = 1; d <= MAXDISTANCE; d++)
         Distance[d].k_run_sums_criteria = sumdata[min(2000, d)];
-
 }
 
 extern void SetProgressBar(void);
 
-/* last update May 19, 1997 */
-/* started may 13, 1997 */
 /* uses different tuple sizes for different distances */
 void newtupbo(void)
 {
@@ -3482,10 +3470,6 @@ void newtupbo(void)
     double oldcopynumber;
     int pass_multiples_test;
 
-    /* Moved here by Yozen on Feb 16, 2016.
-     * Always initialize here. Freed at the end of this function.
-     * maxwraplength has already been initialized in the calling
-     * function, TRF */
     Bandcenter = calloc(maxwraplength + 1, sizeof *Bandcenter);
     // TODO: Add error test. boa@20240726
 
@@ -3498,25 +3482,28 @@ void newtupbo(void)
     if (paramset.ngs != 1)
         SetProgressBar();
 
-    OUTPUTcount = 0;            /* needed to make browser label unique */
+    OUTPUTcount = 0; /* needed to make browser label unique */
 
     mintuplesize = Tuplesize[1];
     maxtuplesize = Tuplesize[NTS];
     for (g = 1; g <= NTS; g++) {
         Tuplehash[g] = calloc(four_to_the[Tuplesize[g]], sizeof(int));
-        Historysize[g] = 2 * (Tuplemaxdistance[g] + 1) + 2; /* The idea here is that no */
-        /* previous history pointer points back */
-        /* more than Tuplemaxdistance.  Then, when */
-        /* History entry is reused, following */
-        /* links from the current will exceed the */
-        /* maxdistance before reaching the reused */
+        // TODO: Add error check. boa@20240726
+
+        Historysize[g] = 2 * (Tuplemaxdistance[g] + 1) + 2; 
+        /* The idea here is that no previous history pointer points back */
+        /* more than Tuplemaxdistance.  Then, when History entry is reused, following */
+        /* links from the current will exceed the maxdistance before reaching the reused */
         /* entry. */
         History[g] = calloc(Historysize[g], sizeof(struct historyentry));
-        Nextfreehistoryindex[g] = 1;    /* set all to 1 because 0 indicates */
-        /* Tuplehash points to nothing */
+        // TODO: Add error check. boa@20240726
+
+        // set all to 1 because 0 indicates Tuplehash points to nothing
+        Nextfreehistoryindex[g] = 1;  // TODO: replace with memset and remove from loop? boa
     }
 
     Sortmultiples = calloc(MAXDISTANCE + 1, sizeof *Sortmultiples);
+    // TODO: Add error check. boa@20240726
 
     build_entire_code = 1;
 
@@ -3533,8 +3520,9 @@ void newtupbo(void)
             if (paramset.ngs != 1)
                 SetProgressBar();
         }
-        if (i == 0            /* before start of sequence or */
-        || strchr("acgtACGT", Sequence[i]) == NULL) {  /* not one of A,C,G,T */
+
+        // if before start of sequence or not one of A,C,G,T
+        if (i == 0 || strchr("acgtACGT", Sequence[i]) == NULL) {  
             badcharindex = i;
             build_entire_code = 1;
 
@@ -3568,30 +3556,33 @@ void newtupbo(void)
         }
 
         Tuplecode[NTS] = code;
-        for (h = NTS - 1; h >= 1; h--) {
+        for (h = NTS - 1; h >= 1; h--)
             Tuplecode[h] = code % four_to_the[Tuplesize[h]];
-        }
 
         /* process index i using all the tuplesizes */
-
         g = 1;
         while (g <= NTS && i - badcharindex >= Tuplesize[g]) {
 
             /* change 5/25/99 ends here */
 
-            y = Tuplehash[g][Tuplecode[g]]; /* index in history list of last
-                                             * occurrence of code */
-            h = Nextfreehistoryindex[g];    /* next free index in history list */
-            j = h + 1;          /* advance next free index */
+            /* index in history list of last occurrence of code */
+            y = Tuplehash[g][Tuplecode[g]]; 
+
+            /* next free index in history list */
+            h = Nextfreehistoryindex[g];    
+
+            /* advance next free index */
+            j = h + 1;
 
             if (j == Historysize[g])
                 j = 1;          /* we use a circular history list */
 
-            if ((History[g][j].location != 0)   /* if the next entry has already been used */
+            if (History[g][j].location != 0   /* if the next entry has already been used */
             && j == Tuplehash[g][History[g][j].code]) {    /* check Tuplehash.  * If it still points here, */
                 Tuplehash[g][History[g][j].code] = 0;   /* zero it out.   */
 
             }
+
             Nextfreehistoryindex[g] = j;
 
             Tuplehash[g][Tuplecode[g]] = h; /* store index of current tuple */
@@ -3636,12 +3627,10 @@ void newtupbo(void)
                             /* test criteria for candidate */
 
                             if ((new_meet_criteria_3(d, i, Tuplesize[g]))
-                                /* change 2: changed 250 into 100 */
-                                && ((d <= 250) || (search_for_range_in_bestperiodlist(i, d))))
+                            && (d <= 250 || search_for_range_in_bestperiodlist(i, d)))
                                 /* use bestperiod list only for distances greater than 500 */
                             {
-                                /* align sequence against candidate */
-                                /* and get alignment */
+                                /* align sequence against candidate and get alignment */
                                 WDPcount++;
                                 Criteria_count[d]++;
                                 Rows = 0;
@@ -3651,22 +3640,22 @@ void newtupbo(void)
                                     get_pair_alignment_with_copynumber(d);
                                 }
                                 else {  /* d is a large distance */
-                                if (1 % 100 == 0)
-                                    fprintf(stderr, "\ni=%d  d=%d", i, d);
-                                narrowbandwrap(i, d, max(MINBANDRADIUS, d_range(d)), min(2 * max(MINBANDRADIUS,
-                                            d_range(d)), (d / 3)), WITHOUTCONSENSUS, RECENTERCRITERION);
-                                Cell_count[d] += (Rows * (2 * max(MINBANDRADIUS, d_range(d)) + 1));
-                                get_narrowband_pair_alignment_with_copynumber(d, min(2 * max(MINBANDRADIUS, d_range(d)),
+                                    if (1 % 100 == 0)
+                                        fprintf(stderr, "\ni=%d  d=%d", i, d);
+                                    narrowbandwrap(i, d, max(MINBANDRADIUS, d_range(d)), min(2 * max(MINBANDRADIUS,
+                                        d_range(d)), (d / 3)), WITHOUTCONSENSUS, RECENTERCRITERION);
+                                    Cell_count[d] += (Rows * (2 * max(MINBANDRADIUS, d_range(d)) + 1));
+                                    get_narrowband_pair_alignment_with_copynumber(d, min(2 * max(MINBANDRADIUS, d_range(d)),
                                         (d / 3)), LOCAL);
                                 }
+
                                 if (Meet_criteria_print)
                                     trf_message("\nFrom:%d, To:%d,  Copynumber:%f",
                                         AlignPair.indexprime[AlignPair.length], AlignPair.indexprime[1], Copynumber);
-                                /* add_to_distanceseenlist(i,d,Maxrealrow,Maxscore,WITHOUTCONSENSUS); */
-                                /* modified 5/23/05 G. Benson */
+                                
                                 add_to_distanceseenarray(i, d, Maxrealrow, Maxscore);
 
-                                /* changed 2/17/05 gary benson
+                                /*
                                  * change to make number of copies required less restrictive for pattern sizes >= 50
                                  * this ramps from 1.9 at pattern size = 50 down to 1.8 at pattern size = 100 or above */
                                 if ((d <= 50 && Copynumber < 1.9)
@@ -3679,7 +3668,6 @@ void newtupbo(void)
                                     /* smallest actual tandem repeat we want to see, so */
                                     /* divide by d to get minimum number of copies */
                                 {
-
                                 }
                                 else {
                                     pass_multiples_test = multiples_criteria_4(d);
@@ -3691,6 +3679,7 @@ void newtupbo(void)
                                         get_consensus(d);
                                         if (ConsClasslength != Classlength)
                                             Classlength = ConsClasslength;
+
                                         oldcopynumber = Copynumber;
                                         /* repeat alignment using consensus */
                                         Consensus_count[Classlength]++;
@@ -3712,23 +3701,15 @@ void newtupbo(void)
                                                 min(2 * max(MINBANDRADIUS, d_range(Classlength)), (Classlength / 3)),
                                                 LOCAL);
                                         }
-                                        /*add_to_distanceseenlist(i,Classlength,Maxrealrow,
-                                         * Maxscore,WITHCONSENSUS); */
-                                        /* modified 5/23/05 G. Benson */
-                                        add_to_distanceseenarray(i, d, Maxrealrow, Maxscore);
 
-                                        /* modified 6/10/05 G. Benson */
+                                        add_to_distanceseenarray(i, d, Maxrealrow, Maxscore);
                                         adjust_bestperiod_entry(d);
 
-                                        /* changed 2/17/05 gary
-                                         * change to make number of copies required less restrictive for pattern sizes >= 50
+                                        /* change to make number of copies required less restrictive for pattern sizes >= 50
                                          * this ramps from 1.9 at pattern size = 50 down to 1.8 at pattern size = 100 or above */
                                         if ((Classlength <= 50 && Copynumber < 1.9)
-                                            || (Classlength > 50 && Classlength <= 100
-                                                && Copynumber < 1.9 - 0.002 * (d - 50))
-                                            || (Classlength > 100 && Copynumber < 1.8))
-                                            /* if(Copynumber<1.9) */
-                                            /*  max(1.9,(double)Min_Distance_Window/(double)Classlength)) */
+                                        || (Classlength > 50 && Classlength <= 100 && Copynumber < 1.9 - 0.002 * (d - 50))
+                                        || (Classlength > 100 && Copynumber < 1.8))
                                         {
                                         }
                                         else if (Classlength >= Minsize && AlignPair.score >= Minscore) {
@@ -3757,7 +3738,6 @@ void newtupbo(void)
     if (paramset.ngs != 1)
         SetProgressBar();
 
-    /* Added by Yozen on Feb 16, 2016. */
     free(Bandcenter);
 }
 
