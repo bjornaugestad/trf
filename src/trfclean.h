@@ -71,84 +71,58 @@ char hlength[256];
  *   Support Procedures Declarations
  ***********************************/
 
-IL *GetList(char *datafile);
+IL *GetList(const char *datafile);
 IL *RemoveBySize(IL * headptr, int maxsize);
 IL *SortByIndex(IL * headptr);
 IL *RemoveRedundancy(IL * headptr);
 IL *SortByCount(IL * headptr);
-void CleanAlignments(IL * headptr, char *alignmentfile);
-void BreakAlignments(IL * headptr, char *alignmentfile);
-void OutputHTML(IL * headptr, char *tablefile, char *alignmentfile);
-void MakeDataFile(IL * headptr, char *datafile, int data);
-void MakeMaskedFile(IL * headptr, int masked, char *Sequence, char *maskfile);
+void CleanAlignments(IL * headptr, const char *alignmentfile);
+void BreakAlignments(IL * headptr, const char *alignmentfile);
+void OutputHTML(IL * headptr, const char *tablefile, const char *alignmentfile);
+void MakeDataFile(IL * headptr, const char *datafile, int data);
+void MakeMaskedFile(IL * headptr, int masked, char *Sequence, const char *maskfile);
 
 void FreeList(IL * headptr);
 
 int IntervalOverlap(IL * iptr, IL * jptr);
 int IsRedundant(IL * iptr, IL * jptr);
-void MakeFileName(char *newname, char *oldname, int tag);
-void OutputHeading(FILE * fp, char *tablefile, char *alignmentfile);
+void MakeFileName(char *newname, const char *oldname, int tag);
+void OutputHeading(FILE * fp, const char *tablefile, const char *alignmentfile);
 
-/***********************************
- *   Chief Procedure Definition
- ***********************************/
-
-void TRFClean(char *datafile, char *alignmentfile, char *tablefile,
-    int maxsize, int data, int masked, char *Sequence, char *maskfile)
+void TRFClean(const char *alignmentfile, const char *tablefile, int maxsize)
 {
     IL *headptr = NULL, *currptr;
     int i;
 
-    /* Added by Yevgeniy Gelfand on Jan 27, 2010  */
     /* To have smaller sequences not send results */
     /* to disc to improve performance             */
     headptr = GlobalIndexList;
-
     headptr = RemoveBySize(headptr, maxsize);
-
     headptr = SortByIndex(headptr);
 
-    if (!paramset.redundoff) {
+    if (!paramset.redundoff) 
         headptr = RemoveRedundancy(headptr);
-    }
 
     headptr = SortByCount(headptr);
 
     if (!paramset.HTMLoff) {
-
         CleanAlignments(headptr, alignmentfile);
-
         BreakAlignments(headptr, alignmentfile);
-
         OutputHTML(headptr, tablefile, alignmentfile);
     }
 
-    /* Added by Yevgeniy Gelfand on Jan 27, 2010  */
-    /* To have smaller sequences not send results */
-    /* to disc to improve performance             */
-    //MakeDataFile(headptr,datafile,data);
-
-    //MakeMaskedFile(headptr, masked, Sequence, maskfile);
-
     /* update the global result */
-    for (i = 0, currptr = headptr; currptr != NULL; i++, currptr = currptr->next);
+    for (i = 0, currptr = headptr; currptr != NULL; i++, currptr = currptr->next)
+        ;
+
     paramset.outputcount = i;
 
-    /* Added by Yevgeniy Gelfand on Jan 27, 2010  */
     /* To have smaller sequences not send results */
     /* to disc to improve performance             */
     GlobalIndexList = headptr;
-
-    return;
 }
 
-/***********************************
- *   Support Procedures Definitions
- ***********************************/
-
-/***********GetList()*******************************************************/
-
-IL *GetList(char *datafile)
+IL *GetList(const char *datafile)
 {
     FILE *fp;
     IL *headptr, *newptr, *lastptr;
@@ -177,7 +151,7 @@ IL *GetList(char *datafile)
     counter = 1;                /* keeps track of order they are found */
     while (1) {
         /* create new index list element */
-        newptr = (IL *) malloc(sizeof(IL));
+        newptr = malloc(sizeof *newptr);
         if (newptr == NULL) {
             FreeList(headptr);
             return NULL;
@@ -454,7 +428,7 @@ IL *SortByCount(IL *headptr)
     return headptr;
 }
 
-void CleanAlignments(IL *headptr, char *alignmentfile)
+void CleanAlignments(IL *headptr, const char *alignmentfile)
 {
     char string1[260];
     char string2[260];
@@ -523,7 +497,7 @@ void CleanAlignments(IL *headptr, char *alignmentfile)
 
 }
 
-void BreakAlignments(IL *headptr, char *alignmentfile)
+void BreakAlignments(IL *headptr, const char *alignmentfile)
 {
     FILE *al_fp;
     FILE *out_fp;
@@ -632,7 +606,7 @@ void BreakAlignments(IL *headptr, char *alignmentfile)
     return;
 }
 
-void MakeFileName(char *newname, char *oldname, int tag)
+void MakeFileName(char *newname, const char *oldname, int tag)
 {
     char newext[20];
     char oldext[10];
@@ -660,7 +634,7 @@ void MakeFileName(char *newname, char *oldname, int tag)
     return;
 }
 
-void OutputHTML(IL *headptr, char *tablefile, char *alignmentfile)
+void OutputHTML(IL *headptr, const char *tablefile, const char *alignmentfile)
 {
     FILE *fp;
     IL *currptr;
@@ -776,7 +750,7 @@ void OutputHTML(IL *headptr, char *tablefile, char *alignmentfile)
     }
 }
 
-void OutputHeading(FILE *fp, char *tablefile, char *alignmentfile)
+void OutputHeading(FILE *fp, const char *tablefile, const char *alignmentfile)
 {
     /* output fixed (old) heading */
     fprintf(fp,
@@ -792,7 +766,7 @@ void OutputHeading(FILE *fp, char *tablefile, char *alignmentfile)
     return;
 }
 
-void MakeDataFile(IL *headptr, char *datafile, int data)
+void MakeDataFile(IL *headptr, const char *datafile, int data)
 {
     FILE *fp;
     IL *lpointer;
@@ -830,10 +804,9 @@ void MakeDataFile(IL *headptr, char *datafile, int data)
     }
     else
         remove(datafile);
-    return;
 }
 
-void MakeMaskedFile(IL *headptr, int masked, char *Sequence, char *maskfile)
+void MakeMaskedFile(IL *headptr, int masked, char *Sequence, const char *maskfile)
 {
     int count, printcr;
     int masker;

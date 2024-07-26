@@ -639,10 +639,10 @@ void TRF(FASTASEQUENCE *pseq)
     Test = 1;
 
     /* print the names of the files */
-    sprintf(htmlstring, "%s.%s.html", paramset.outputprefix, paramstring);
-    sprintf(txtstring, "%s.%s.txt.html", paramset.outputprefix, paramstring);
-    sprintf(datstring, "%s.%s.dat", paramset.outputprefix, paramstring);
-    sprintf(maskstring, "%s.%s.mask", paramset.outputprefix, paramstring);
+    snprintf(htmlstring, sizeof htmlstring, "%s.%s.html", paramset.outputprefix, paramstring);
+    snprintf(txtstring, sizeof txtstring, "%s.%s.txt.html", paramset.outputprefix, paramstring);
+    snprintf(datstring, sizeof datstring, "%s.%s.dat", paramset.outputprefix, paramstring);
+    snprintf(maskstring, sizeof maskstring, "%s.%s.mask", paramset.outputprefix, paramstring);
 
     /* start txt file */
     if (!paramset.HTMLoff) {
@@ -798,8 +798,6 @@ void TRF(FASTASEQUENCE *pseq)
     free(AlignPair.indexsecnd);
     free(Tag);
     free(Index);
-    /* free_distanceseenlist(); */
-    /* modified 5/23/05 G. Benson */
     free_distanceseenarray();
 
     /* free distance list and all its entries */
@@ -817,20 +815,16 @@ void TRF(FASTASEQUENCE *pseq)
     if (paramset.ngs != 1)
         PrintProgress("Resolving output...");
 
-    /* this function define on trfclean.h */
-    TRFClean(datstring, txtstring, htmlstring, MaxPeriod, paramset.datafile, paramset.maskedfile, Sequence, maskstring);
+    TRFClean(datstring, txtstring, MaxPeriod);
 
     /* Set the name of the outputfilename global to name given to
      * file in routines defined in trfclean.h */
     MakeFileName(paramset.outputfilename, htmlstring, 1);
 
-    /* added Nov 1, 2012 by Y. Gelfand */
     free_bestperiodlist();
 
     if (paramset.ngs != 1)
         PrintProgress("Done.");
-
-    return;
 }
 
 void PrintError(char *errortext)

@@ -137,7 +137,7 @@ void narrowbandwrap(int start, int size, int bandradius, int bandradiusforward, 
 {
     int g;
     int pleft;
-    int c, end_of_trace, maxrow, maxcol, mincol;
+    int c, end_of_trace, maxrow, maxcol, mincol = 0;
     int maxrealrow, minrealrow;
     char currchar;
     int matches_in_diagonal, matchatmax_col, i, k, maxrowscore, lastmatchatmax_col, match_yes_no;
@@ -1982,20 +1982,17 @@ void untag_Distance_window(int d, int linkdown)
 
 int no_matches_so_unlink_Distance(int d, int location, struct distancelist *objptr)
 {
-    int *lo, *hi, g, h;
-    int *z, *m;
+    int g, h;
     int windowleftend, windowsize;
-    struct distancelist *list;
 
     /* this value is used to  mod the index to the entries. 
      * The entries run from 0 to max(d,Min_Distance_Entries) */
     windowsize = max(d, Min_Distance_Entries) + 1;  
 
-    list = &objptr[d];
-    hi = &list->highindex;
-    lo = &list->lowindex;
-    z = &list->numentries;
-    m = &list->nummatches;
+    struct distancelist *list = &objptr[d];
+    int *lo = &list->lowindex;
+    int *z = &list->numentries;
+    int *m = &list->nummatches;
 
     if (*z != 0) {            /* there exist previous entries on this list */
         /* first remove trailing entries, i.e., */
@@ -3467,7 +3464,6 @@ void newtupbo(void)
     int mintuplesize, maxtuplesize, build_entire_code, g, badcharindex;
     int code, y, i, h, d, yy, j;
     int found, progbarpos, percentincrease, onepercent;
-    double oldcopynumber;
     int pass_multiples_test;
 
     Bandcenter = calloc(maxwraplength + 1, sizeof *Bandcenter);
@@ -3680,7 +3676,6 @@ void newtupbo(void)
                                         if (ConsClasslength != Classlength)
                                             Classlength = ConsClasslength;
 
-                                        oldcopynumber = Copynumber;
                                         /* repeat alignment using consensus */
                                         Consensus_count[Classlength]++;
                                         Rows = 0;
