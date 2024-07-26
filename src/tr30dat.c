@@ -118,10 +118,6 @@ if (*pcurr>=maxscore)\
     else matchatmax_col=-2;\
 }
 
-#define test_maxrowscore_without_match \
-    if (*pcurr>maxrowscore)\
-matchatmax_col=-2;
-
 /* *pcurr>=maxscore added 2.17.05 gary benson -- to extend alignment as far as possible */
 #define test_trace_and_forward_maxscore \
     if ((realr>=start)&&(*pcurr==0))\
@@ -248,7 +244,8 @@ void narrowbandwrap(int start, int size, int bandradius, int bandradiusforward, 
             for (i = k - 2; i >= 0; i--) {
                 pleft = (*pcurr = max2(0, pleft)) + Delta;
                 test_trace_and_backwards_maxscore;
-                test_maxrowscore_without_match;
+                if (*pcurr > maxrowscore)
+                    matchatmax_col = -2;
                 pcurr--;
                 c = (c - 1 + size) % size;
             }
@@ -261,7 +258,8 @@ void narrowbandwrap(int start, int size, int bandradius, int bandradiusforward, 
             for (i = 2 * w; i >= 2 * w - k + 1; i--) {
                 pleft = (*pcurr = max2(0, pleft)) + Delta;
                 test_trace_and_backwards_maxscore;
-                test_maxrowscore_without_match;
+                if (*pcurr > maxrowscore)
+                    matchatmax_col = -2;
                 pcurr--;
                 c = (c - 1 + size) % size;
             }
@@ -269,7 +267,8 @@ void narrowbandwrap(int start, int size, int bandradius, int bandradiusforward, 
             i = 2 * w - k;
             pleft = (*pcurr = max3(0, *pup, pleft)) + Delta;
             test_trace_and_backwards_maxscore;
-            test_maxrowscore_without_match;
+            if (*pcurr > maxrowscore)
+                matchatmax_col = -2;
             pcurr--;
             pup--;
             c = (c - 1 + size) % size;
@@ -405,7 +404,8 @@ void narrowbandwrap(int start, int size, int bandradius, int bandradiusforward, 
             for (i = 2 * w - k + 2; i <= 2 * w; i++) {
                 pleft = (*pcurr = max2(0, pleft)) + Delta;
                 test_trace_and_forward_maxscore;
-                test_maxrowscore_without_match;
+                if (*pcurr > maxrowscore)
+                    matchatmax_col = -2;
                 pcurr++;
                 c = (c + 1) % size;
             }
@@ -418,7 +418,8 @@ void narrowbandwrap(int start, int size, int bandradius, int bandradiusforward, 
             for (i = 0; i <= k - 1; i++) {
                 pleft = (*pcurr = max2(0, pleft)) + Delta;
                 test_trace_and_forward_maxscore;
-                test_maxrowscore_without_match;
+                if (*pcurr > maxrowscore)
+                    matchatmax_col = -2;
                 pcurr++;
                 c = (c + 1) % size;
             }
@@ -426,7 +427,8 @@ void narrowbandwrap(int start, int size, int bandradius, int bandradiusforward, 
             i = k;
             pleft = (*pcurr = max3(0, *pup, pleft)) + Delta;
             test_trace_and_forward_maxscore;
-            test_maxrowscore_without_match;
+            if (*pcurr > maxrowscore)
+                matchatmax_col = -2;
             pcurr++;
             pup++;
             c = (c + 1) % size;

@@ -286,31 +286,26 @@ struct distancelistelement {
     struct distancelistelement *next;
 } Distanceseenlist[1];
 
-/* macros */
-
-#define max4( a, b, c, d )                                                 \
-    ( ( a >= b )                                                           \
-        ? ( ( a >= c ) ? ( ( a >= d ) ? a : d ) : ( ( c >= d ) ? c : d ) ) \
-        : ( ( b >= c ) ? ( ( b >= d ) ? b : d ) : ( ( c >= d ) ? c : d ) ) )
-
 /* returns max of 4 in order a,b,c,d */
-
-#define max3( a, b, c ) \
-    ( ( a >= b ) ? ( ( a >= c ) ? a : c ) : ( ( b >= c ) ? b : c ) )
+static inline int max4( int a, int b, int c, int d)
+{
+    return ( ( a >= b )
+        ? ( ( a >= c ) ? ( ( a >= d ) ? a : d ) : ( ( c >= d ) ? c : d ) ) 
+        : ( ( b >= c ) ? ( ( b >= d ) ? b : d ) : ( ( c >= d ) ? c : d ) ) );
+}
 
 /* returns max of 3 in order a,b,c */
+static inline int max3( int a, int b, int c )
+{
+    return a >= b ? a >= c ? a : c : b >= c ? b : c;
+}
 
-//#define match(a, b) ((a==b)?Alpha:Beta)
-
-/* returns match mismatch matrix value */
-
-/* Jan 27, 2006, Gelfand, changed to use Similarity Matrix to avoid N matching
- * itself */
-
-/* This function may be called multiple times (for different match/mismatch
- * scores) */
+/* This function may be called multiple times (for different match/mismatch scores) */
 int *SM = NULL;
 
+// TODO: Replace with something saner, but note that a and b 
+// differs in types here and there. char or unsigned char.
+// boa@20240726
 #define match( a, b ) ( SM[256 * ( ( a ) ) + ( b )] )
 
 #define fill_align_pair( c1, c2, l, i, j ) \
