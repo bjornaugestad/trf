@@ -540,17 +540,17 @@ void TRF(struct fastasequence *pseq)
     Alpha = paramset.ps_match;
     Beta = -paramset.ps_mismatch;
     Delta = -paramset.ps_indel;
-    PM = paramset.ps_PM;
-    PI = paramset.ps_PI;
+    g_PM = paramset.ps_PM;
+    g_PI = paramset.ps_PI;
     Minscore = paramset.ps_minscore;
     MaxPeriod = paramset.ps_maxperiod;
-    MAXDISTANCE = MAXPATTERNSIZE = paramset.ps_maxperiod;
-    if (MAXDISTANCE < 500) {
-        MAXDISTANCE = MAXPATTERNSIZE = 500;
+    g_MAXDISTANCE = g_MAXPATTERNSIZE = paramset.ps_maxperiod;
+    if (g_MAXDISTANCE < 500) {
+        g_MAXDISTANCE = g_MAXPATTERNSIZE = 500;
     }
 
-    MAXDISTANCE = MAXPATTERNSIZE = min(MAXDISTANCE, (int)(pseq->length * .6));
-    MAXDISTANCE = MAXPATTERNSIZE = max(MAXDISTANCE, 200);
+    g_MAXDISTANCE = g_MAXPATTERNSIZE = min(g_MAXDISTANCE, (int)(pseq->length * .6));
+    g_MAXDISTANCE = g_MAXPATTERNSIZE = max(g_MAXDISTANCE, 200);
 
     /* generate the parameter string to be used in file names */
     sprintf(paramstring, "%d.%d.%d.%d.%d.%d.%d",
@@ -600,8 +600,8 @@ void TRF(struct fastasequence *pseq)
 
     Distance = new_distancelist();
     clear_distancelist(Distance);
-    Tag = newTags(MAXDISTANCE / TAGSEP + 1);
-    Toptag = (int)ceil(MAXDISTANCE / TAGSEP);
+    Tag = newTags(g_MAXDISTANCE / TAGSEP + 1);
+    Toptag = (int)ceil(g_MAXDISTANCE / TAGSEP);
     init_links();
 
     init_index();
@@ -616,7 +616,7 @@ void TRF(struct fastasequence *pseq)
 
     /* over allocate statistics_distance array to prevent spill in alignments
      * with execive insertion counts Jan 07, 2003 */
-    Statistics_Distance = calloc(4 * MAXDISTANCE, sizeof *Statistics_Distance);
+    Statistics_Distance = calloc(4 * g_MAXDISTANCE, sizeof *Statistics_Distance);
     if (Statistics_Distance == NULL) {
         PrintError("Unable to allocate memory for Statistics_Distance array");
         exit(-3);
@@ -646,25 +646,25 @@ void TRF(struct fastasequence *pseq)
     /* following four memory allocations increased to avoid memory error when
      * consensus length exceeds MAXDISTANCE after returning from get_consensus(d) */
 
-    Criteria_count = calloc(2 * (MAXDISTANCE + 1), sizeof *Criteria_count);
+    Criteria_count = calloc(2 * (g_MAXDISTANCE + 1), sizeof *Criteria_count);
     if (Criteria_count == NULL) {
         PrintError("Unable to allocate Criteria_count");
         exit(-4);
     }
 
-    Consensus_count = calloc(2 * (MAXDISTANCE + 1), sizeof *Consensus_count);
+    Consensus_count = calloc(2 * (g_MAXDISTANCE + 1), sizeof *Consensus_count);
     if (Consensus_count == NULL) {
         PrintError("Unable to allocate memory for Consensus_count");
         exit(-5);
     }
 
-    Cell_count = calloc(2 * (MAXDISTANCE + 1), sizeof *Cell_count);
+    Cell_count = calloc(2 * (g_MAXDISTANCE + 1), sizeof *Cell_count);
     if (Cell_count == NULL) {
         PrintError("Unable to allocate memory for Cell_count");
         exit(-6);
     }
 
-    Outputsize_count = calloc(2 * (MAXDISTANCE + 1), sizeof *Outputsize_count);
+    Outputsize_count = calloc(2 * (g_MAXDISTANCE + 1), sizeof *Outputsize_count);
     if (Outputsize_count == NULL) {
         PrintError("Unable to allocate memory for Outputsize_count");
         exit(-7);
@@ -684,7 +684,7 @@ void TRF(struct fastasequence *pseq)
     newtupbo();                 /* this is the main function of the algorithm */
 
     Cell_total = 0;
-    for (i = MAXDISTANCE; i >= 1; i--) {
+    for (i = g_MAXDISTANCE; i >= 1; i--) {
         Cell_total += Cell_count[i];
         if (i <= SMALLDISTANCE)
             Wasted_total += (Criteria_count[i] + Consensus_count[i]) * i * i * 2;

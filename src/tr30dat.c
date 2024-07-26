@@ -55,7 +55,7 @@ int* newTags(int length)
 
 int d_range(int d)
 {
-    return ((int)floor(2.3 * sqrt(Pindel * d)));
+    return ((int)floor(2.3 * sqrt(g_Pindel * d)));
 }
 
 /* Jan 27, 2006, Gelfand, changed to use Similarity Matrix to avoid N matching itself */
@@ -549,7 +549,7 @@ void newwrap(int start, int size, int consensuspresent)
         pup = &Up[adjlength];
         for (c = adjlength; c >= 0; c--) {
             *pup = (pleft = (*pcurr = max4(0, *pdiag, *pup, pleft)) + Delta);
-            if ((realr <= start - max(size, Min_Distance_Window)) && (*pcurr == 0))
+            if ((realr <= start - max(size, g_Min_Distance_Window)) && (*pcurr == 0))
                 *pup = pleft = *pcurr = -1000;
             else
                 end_of_trace = FALSE;
@@ -826,7 +826,7 @@ int search_for_range_in_bestperiodlist(int start, int distance)
     entrylast = Bestperiodlist;
     range_covered = FALSE;
     while (entry != NULL) {
-        if (entry->indexhigh < start - 2 * MAXDISTANCE) {
+        if (entry->indexhigh < start - 2 * g_MAXDISTANCE) {
             /* remove current entry, too far back */
 
             entrylast->next = entry->next;
@@ -987,7 +987,7 @@ int search_for_distance_match_in_distanceseenlist(int distance, int start)
 
         /* +1 added to correct for the < instead of <= */
         /* changed start to start-distance */
-        if (entry->end < min(start - distance, max(start - Minscore / Alpha, start - Min_Distance_Window)) + 1) {
+        if (entry->end < min(start - distance, max(start - Minscore / Alpha, start - g_Min_Distance_Window)) + 1) {
             entrylast->next = entry->next;
             temp = entry;
             entry = entrylast;
@@ -1857,17 +1857,17 @@ struct distancelist *new_distancelist(void)
     int g, N, K;
     struct distanceentry *ptr;
 
-    struct distancelist *objptr = calloc(MAXDISTANCE + 1, sizeof *objptr);
+    struct distancelist *objptr = calloc(g_MAXDISTANCE + 1, sizeof *objptr);
 
-    K = Min_Distance_Entries + 1;
-    N = MAXDISTANCE + 1;
+    K = g_Min_Distance_Entries + 1;
+    N = g_MAXDISTANCE + 1;
     ptr = _DistanceEntries = malloc(((K + N) * (N - K + 1) / 2 + K * (K - 1)) * sizeof(struct distanceentry));
     // TODO: add error handling. boa@20240726
 
-    for (g = 1; g <= MAXDISTANCE; g++) {
+    for (g = 1; g <= g_MAXDISTANCE; g++) {
         objptr[g].entry = ptr;
-        memset(objptr[g].entry, 0, (max(g, Min_Distance_Entries) + 1) * sizeof(struct distanceentry));
-        ptr += (max(g, Min_Distance_Entries) + 1);
+        memset(objptr[g].entry, 0, (max(g, g_Min_Distance_Entries) + 1) * sizeof(struct distanceentry));
+        ptr += (max(g, g_Min_Distance_Entries) + 1);
     }
 
     return objptr;
@@ -1875,9 +1875,9 @@ struct distancelist *new_distancelist(void)
 
 void clear_distancelist(struct distancelist *objptr)
 {
-    for (int i = 1; i <= MAXDISTANCE; i++) {
+    for (int i = 1; i <= g_MAXDISTANCE; i++) {
         objptr[i].lowindex = 0;
-        objptr[i].highindex = max(i, Min_Distance_Entries);
+        objptr[i].highindex = max(i, g_Min_Distance_Entries);
         objptr[i].numentries = 0;
         objptr[i].nummatches = 0;
     }
@@ -1885,7 +1885,7 @@ void clear_distancelist(struct distancelist *objptr)
 
 void init_links(void)
 {
-    Distance[0].linkup = MAXDISTANCE + 1;
+    Distance[0].linkup = g_MAXDISTANCE + 1;
 }
 
 void add_tuple_match_to_Distance_entry(int location, int size, int d, struct distancelist *objptr)
@@ -1898,7 +1898,7 @@ void add_tuple_match_to_Distance_entry(int location, int size, int d, struct dis
     /* get distance window pointers.
      * this value is used to  mod the index to the entries.
      * The entries run from 0 to max(d,Min_Distance_Entries) */
-    windowsize = max(d, Min_Distance_Entries) + 1;  
+    windowsize = max(d, g_Min_Distance_Entries) + 1;  
     list = &objptr[d];
     hi = &list->highindex;
     lo = &list->lowindex;
@@ -1909,7 +1909,7 @@ void add_tuple_match_to_Distance_entry(int location, int size, int d, struct dis
         /* first remove trailing entries, i.e., */
         /* those with location<location-d or */
         /* <location-Min_Distance_Window, whichever is further back */
-        windowleftend = min(location - d, location - Min_Distance_Window) + 1;
+        windowleftend = min(location - d, location - g_Min_Distance_Window) + 1;
         /* note that preceding is based on Min_Distance_Window */
         /* rather than Min_Distance_Entries */
 
@@ -1973,7 +1973,7 @@ void link_Distance_window(int d)
     h = Distance[f].linkup;
     Distance[d].linkup = h;
     Distance[f].linkup = d;
-    if (h <= MAXDISTANCE)
+    if (h <= g_MAXDISTANCE)
         Distance[h].linkdown = d;
 
     Distance[d].linked = TRUE;
@@ -2002,7 +2002,7 @@ int no_matches_so_unlink_Distance(int d, int location, struct distancelist *objp
 
     /* this value is used to  mod the index to the entries. 
      * The entries run from 0 to max(d,Min_Distance_Entries) */
-    windowsize = max(d, Min_Distance_Entries) + 1;  
+    windowsize = max(d, g_Min_Distance_Entries) + 1;  
 
     struct distancelist *list = &objptr[d];
     int *lo = &list->lowindex;
@@ -2013,9 +2013,9 @@ int no_matches_so_unlink_Distance(int d, int location, struct distancelist *objp
         /* first remove trailing entries, i.e., */
         /* those with location<location-d or */
         /* <location-Min_Distance_Window, whichever is further back */
-        windowleftend = min(location - d, location - Min_Distance_Window) + 1;
+        windowleftend = min(location - d, location - g_Min_Distance_Window) + 1;
         /* note that preceding is based on Min_Distance_Window */
-        /* rather than Min_Distance_Entries */
+        /* rather than g_Min_Distance_Entries */
 
         while ((list->entry[*lo].location < windowleftend) && ((*z) > 0)) {
             (*z)--;
@@ -2033,7 +2033,7 @@ int no_matches_so_unlink_Distance(int d, int location, struct distancelist *objp
         h = Distance[d].linkup;
 
         Distance[g].linkup = h;
-        if (h <= MAXDISTANCE)
+        if (h <= g_MAXDISTANCE)
             Distance[h].linkdown = g;
 
         Distance[d].linked = FALSE;
@@ -2116,8 +2116,8 @@ int GetTopPeriods(unsigned char *pattern, int length, int *toparray)
 
     /* pick highest values */
     end = length - 2;
-    if (end > MAXDISTANCE)
-        end = MAXDISTANCE;      /* 3/14/05 accepts smaller multiples is best ones are too large */
+    if (end > g_MAXDISTANCE)
+        end = g_MAXDISTANCE;      /* 3/14/05 accepts smaller multiples is best ones are too large */
     for (t = 0; t < NUMBER_OF_PERIODS; t++) {
         /* do t passes to find t highes counts */
         topind = 0;
@@ -2224,7 +2224,7 @@ int new_meet_criteria_3(int d, int location, int tuplesize)
     /* collect info about d for criteria tests */
     main_d_info = &(Distance[d]);
     min_krun_matches = main_d_info->k_run_sums_criteria;
-    max_first_match_location = max(0, location - max(d, Min_Distance_Window))
+    max_first_match_location = max(0, location - max(d, g_Min_Distance_Window))
         + main_d_info->waiting_time_criteria;
 
     low_end_of_range = main_d_info->lo_d_range;
@@ -2494,7 +2494,7 @@ void get_statistics(int consensussize)
 
     size = consensussize;
 
-    for (g = 1; g <= MAXDISTANCE + d_range(MAXDISTANCE); g++)
+    for (g = 1; g <= g_MAXDISTANCE + d_range(g_MAXDISTANCE); g++)
         Statistics_Distance[g] = 0;
 
     match = 0;
@@ -2569,7 +2569,7 @@ void get_statistics(int consensussize)
                         d = -d;
 
                     /* protect for memory override January 08, 2003 */
-                    if (d < (4 * MAXDISTANCE)) {
+                    if (d < (4 * g_MAXDISTANCE)) {
                         Statistics_Distance[d]++;
                         if (d < mindistance)
                             mindistance = d;
@@ -2631,7 +2631,7 @@ void get_statistics(int consensussize)
                     d = -d;
 
                 /* protect for memory override January 08, 2003 */
-                if (d < (4 * MAXDISTANCE)) {
+                if (d < (4 * g_MAXDISTANCE)) {
                     Statistics_Distance[d]++;
                     if (d < mindistance)
                         mindistance = d;
@@ -3384,24 +3384,24 @@ void init_and_fill_coin_toss_stats2000_with_4tuplesizes(void)
     const int *waitdata, *sumdata;
 
     /* random walk range */
-    trf_message("\nPmatch=%3.2f,Pindel=%3.2f", (float)PM / 100, (float)PI / 100);
-    Pindel = (float)PI / 100;
-    for (g = 1; g <= MAXDISTANCE; g++) {
+    trf_message("\nPmatch=%3.2f,Pindel=%3.2f", (float)g_PM / 100, (float)g_PI / 100);
+    g_Pindel = (float)g_PI / 100;
+    for (g = 1; g <= g_MAXDISTANCE; g++) {
         if (g <= SMALLDISTANCE) {
             Distance[g].lo_d_range = g /* this can never be less than one */ ;
             Distance[g].hi_d_range = g; /* this can never be greater */
-            /* than MAXDISTANCE */
+            /* than g_MAXDISTANCE */
         }
         else {
             Distance[g].lo_d_range = max(g - d_range(g), 1);    /* this can never be less than one */
 
-            Distance[g].hi_d_range = min(g + d_range(g), MAXDISTANCE);  /* this can never be greater */
+            Distance[g].hi_d_range = min(g + d_range(g), g_MAXDISTANCE);  /* this can never be greater */
             /* than MAXDISTANCE */
         }
     }
 
     /* Waiting time calculations */
-    if (PM == 80) {
+    if (g_PM == 80) {
         NTS = 3;                /* Tuplesize[NTS+1]={0,4,5,7}; */
         Tuplesize[0] = 0;
         Tuplesize[1] = 4;
@@ -3411,13 +3411,13 @@ void init_and_fill_coin_toss_stats2000_with_4tuplesizes(void)
         Tuplemaxdistance[0] = 0;
         Tuplemaxdistance[1] = 29;
         Tuplemaxdistance[2] = 159;
-        Tuplemaxdistance[3] = MAXDISTANCE;
-        trf_message("\ntuple distances 0, 29, 159, %d", MAXDISTANCE);
+        Tuplemaxdistance[3] = g_MAXDISTANCE;
+        trf_message("\ntuple distances 0, 29, 159, %d", g_MAXDISTANCE);
 
         /* assign pointers to data */
         waitdata = waitdata80;
     }
-    else if (PM == 75) {
+    else if (g_PM == 75) {
         NTS = 4;
         Tuplesize[0] = 0;
         Tuplesize[1] = 3;
@@ -3429,45 +3429,45 @@ void init_and_fill_coin_toss_stats2000_with_4tuplesizes(void)
         Tuplemaxdistance[1] = 29;
         Tuplemaxdistance[2] = 43;
         Tuplemaxdistance[3] = 159;
-        Tuplemaxdistance[4] = MAXDISTANCE;
-        trf_message("\ntuple distances 0, 29, 43, 159, %d", MAXDISTANCE);
+        Tuplemaxdistance[4] = g_MAXDISTANCE;
+        trf_message("\ntuple distances 0, 29, 43, 159, %d", g_MAXDISTANCE);
 
         /* assign pointers to strings with data */
         waitdata = waitdata75;
     }
     else {
-        trf_message("\nNo wait table file for PM=%d", PM);
-        fprintf(stderr, "\nNo wait table file for PM=%d", PM);
+        trf_message("\nNo wait table file for PM=%d", g_PM);
+        fprintf(stderr, "\nNo wait table file for PM=%d", g_PM);
         exit(-13);
     }
 
-    /* Oct 15, 2018 Yozen: truncate value of MAXDISTANCE to 2000
+    /* Oct 15, 2018 Yozen: truncate value of g_MAXDISTANCE to 2000
      * if it exceeds that value, to avoid out-of-bounds crashes here.
      * Arrays are only as large as 2004. This is a temporary change
      * while we figure out the best approach to larger pattern sizes.
      * We may also decide that patterns larger than that are simply
      * out of scope for TRF */
-    for (d = 1; d <= MAXDISTANCE; d++)
+    for (d = 1; d <= g_MAXDISTANCE; d++)
         Distance[d].waiting_time_criteria = waitdata[min(2000, d)];
 
     /* k_run_sums_criteria */
 
-    if (PM == 80) {
+    if (g_PM == 80) {
         /* assign pointers to strings with data */
         sumdata = sumdata80;
     }
-    else if (PM == 75) {
+    else if (g_PM == 75) {
         /* assign pointers to strings with data */
         sumdata = sumdata75;
     }
     else {
-        trf_message("\nNo sum table file for PM=%d", PM);
-        fprintf(stderr, "\nNo sum table file for PM=%d", PM);
+        trf_message("\nNo sum table file for PM=%d", g_PM);
+        fprintf(stderr, "\nNo sum table file for PM=%d", g_PM);
         exit(-13);
     }
 
-    /* Oct 15, 2018 Yozen: truncate value of MAXDISTANCE to 2000 */
-    for (d = 1; d <= MAXDISTANCE; d++)
+    /* Oct 15, 2018 Yozen: truncate value of g_MAXDISTANCE to 2000 */
+    for (d = 1; d <= g_MAXDISTANCE; d++)
         Distance[d].k_run_sums_criteria = sumdata[min(2000, d)];
 }
 
@@ -3513,7 +3513,7 @@ void newtupbo(void)
         Nextfreehistoryindex[g] = 1;  // TODO: replace with memset and remove from loop? boa
     }
 
-    Sortmultiples = calloc(MAXDISTANCE + 1, sizeof *Sortmultiples);
+    Sortmultiples = calloc(g_MAXDISTANCE + 1, sizeof *Sortmultiples);
     // TODO: Add error check. boa@20240726
 
     build_entire_code = 1;

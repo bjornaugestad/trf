@@ -79,14 +79,14 @@ unsigned int maxwraplength = 0;
 /* minimum number of places to store a tuple match.  Usually this is the same
  * as the distance, but for small distances, we allow more tuple matches 
  * because we want see a significant number of matches */
-int Min_Distance_Entries = 20;  
+int g_Min_Distance_Entries = 20;  
 
 /* minimum size of distance window. */
 /* Usually this is the same as the */
 /* distance, but for small distances we */
 /* allow more space because we want a */
 /* significant number of matches */
-int Min_Distance_Window = 20;
+int g_Min_Distance_Window = 20;
 
 
 // index separation for tags table for linking 
@@ -94,23 +94,19 @@ int Min_Distance_Window = 20;
 // matches 
 #define TAGSEP 50
 
-int PM;
-int PI;
+int g_PM;
+int g_PI;
 
 /* expected probability of a single character indel in the worst case tandem
  * repeat. Pindel should be tied to the indel cost parameter */
-double Pindel;
+double g_Pindel;
 
-int MAXDISTANCE = 500;
-int MAXPATTERNSIZE = 500;
+int g_MAXDISTANCE = 500;
+int g_MAXPATTERNSIZE = 500;
 char debugbuffer[500];
-
-/* G. Benson 1/28/2004 */
 
 /* size of EC increased to avoid memory error when consensus length exceeds
    MAXPATTERNSIZECONSTANT after returning from get_consensus(d) */
-
-/* Y. Hernandez 10/15/2018 */
 
 /* If patternsize over 2000 is ever allowed, must change how this
  * variable is initialized. Must be a dynamically allocated array,
