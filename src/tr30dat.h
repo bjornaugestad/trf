@@ -21,26 +21,13 @@ You should have received a copy of the GNU Affero General Public
 License along with TRF.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-/* Feb. 14th, 1997 */
-
-/* This is a version which contains the narrow band alignment routines
-   narrowbnd.c, prscores.c, pairalign.c */
-
-
-/* These declarations moved by Yevgeniy Gelfand on Jan 27, 2010  */
-
-/* To have smaller sequences not send results */
-
 /* to disc to improve performance             */
 int counterInSeq = 0;
 
 /* uncomment only one platform target identifier */
 
 #define UNIXCONSOLE
-
-#ifdef UNIXCONSOLE
 #define _MAX_PATH 260
-#endif
 
 /* use semantic versioning, please: https://semver.org/ */
 #ifndef PACKAGE_VERSION
@@ -60,62 +47,11 @@ int counterInSeq = 0;
 #define MINBANDRADIUS 6
 #define RECENTERCRITERION 3
 
-/* 6/24/05 G. Benson */
-//#define MAXBANDWIDTH 300
 #define MAXBANDWIDTH 150
 #define MAXTUPLESIZES 10
 
-/* 6/17/05 G. Benson */
-
-/* 1/26/10 G. Benson */
-
-/* make MAXWRAPLENGTH an integer instead of a constant */
-
-/* #define MAXWRAPLENGTH 500000 */
-
-/* #define MAXWRAPLENGTHCONST 500000 */
-
-/* 11/17/15 G. Benson */
-
-/* make MAXWRAPLENGTHCONST longer to accomodate long centromeric repeats */
-
-/* #define MAXWRAPLENGTHCONST 5000000 */
-
-/* 01/13/16 Y. Hernandez */
-
-/* make MAXWRAPLENGTHCONST longer to accomodate longer repeat in Human chr 18,
- * HG38 */
-
-/* #define MAXWRAPLENGTHCONST 10000000 */
-
-/* 01/22/16 Y. Hernandez */
-
-/* make MAXWRAPLENGTHCONST longer to accomodate longer repeat in Human chr 18,
- * HG38 */
-
-/* 01/26/16 Y. Hernandez */
-
-/* Let MAXWRAPLENGTHCONST be definable on the command line. Easier to update
- * without changing source. */
-
-/* 02/05/16 Y. Hernandez */
-
-/* End use of MAXWRAPLENGTHCONST macro, use a command line option instead. */
-//#ifndef MAXWRAPLENGTHCONST
-//#define MAXWRAPLENGTHCONST 10000000
-//#endif
-
-/* 02/05/16 Y. Hernandez */
-
 /* Since this is no longer a macro, use all lower case to avoid confusion. */
 unsigned int maxwraplength = 0;
-
-/* Added by Yevgeniy Gelfand on Jan 27, 2010  */
-
-/* To have smaller sequences not send results */
-
-/* to disc to improve performance             */
-// int TempFilesToDisc = 0;
 
 #define MAXPATTERNSIZECONSTANT MAXDISTANCECONSTANT // replaced by a variable 
 #define DASH '-'
@@ -325,37 +261,37 @@ double Cell_total, Wasted_total;
 #define GLOBAL 0
 #define LOCAL 1
 
-typedef struct {
-    unsigned int match;
-    unsigned int mismatch;
-    unsigned int indel;
-    unsigned int minscore;
-    unsigned int maxperiod;
-    unsigned int PM;
-    unsigned int PI;
-    int datafile;
-    int maskedfile;
-    int flankingsequence;
-    unsigned int flankinglength;
-    int HTMLoff;
-    int redundoff;
-    int ngs;
-    int use_stdin;
-    unsigned int maxwraplength;
+struct paramset {
+    unsigned int ps_match;
+    unsigned int ps_mismatch;
+    unsigned int ps_indel;
+    unsigned int ps_minscore;
+    unsigned int ps_maxperiod;
+    unsigned int ps_PM;
+    unsigned int ps_PI;
+    int ps_datafile;
+    int ps_maskedfile;
+    int ps_flankingsequence;
+    unsigned int ps_flankinglength;
+    int ps_HTMLoff;
+    int ps_redundoff;
+    int ps_ngs;
+    int ps_use_stdin;
+    unsigned int ps_maxwraplength;
 
-    char inputfilename[_MAX_PATH];  /* constant defined in stdlib */
-    char outputprefix[_MAX_PATH];
-    char outputdirectory[_MAX_PATH];
-    char outputfilename[_MAX_PATH];
-    int multisequencefile;      /* flags if file has more than one sequence */
-    int sequenceordinal;        /* holds seq. index starting on 1 */
-    int outputcount;            /* repeats found */
-    int running;
-    char *endstatus;
-    int percent;
-} TRFPARAMSET;
+    char ps_inputfilename[_MAX_PATH];  /* constant defined in stdlib */
+    char ps_outputprefix[_MAX_PATH];
+    char ps_outputdirectory[_MAX_PATH];
+    char ps_outputfilename[_MAX_PATH];
+    int ps_multisequencefile;      /* flags if file has more than one sequence */
+    int ps_sequenceordinal;        /* holds seq. index starting on 1 */
+    int ps_outputcount;            /* repeats found */
+    int ps_running;
+    char *ps_endstatus;
+    int ps_percent;
+};
 
-TRFPARAMSET paramset;           /* this global controls the algorithm */
+struct paramset paramset;           /* this global controls the algorithm */
 
 /* change MAXWRAPLENGTH to MAXWRAPLENGTHCONST so MAXWRAPLENGTH can be used as an int */
 
@@ -460,7 +396,7 @@ int print_flanking = 0;
 /* the following structure is used to pass a sequence to the algorithm */
 #define MAXSEQNAMELEN 200
 
-typedef struct {
+struct fastasequence {
     /* Changed to unsigned Feb 16, 2016 Yozen */
     unsigned int length;
     int composition[26];
@@ -468,7 +404,7 @@ typedef struct {
     char name[MAXSEQNAMELEN];
     char *sequence;
 
-} FASTASEQUENCE;
+};
 
 void trf_message(char *format, ...);
 

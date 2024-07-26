@@ -37,14 +37,14 @@ void TRFControlRoutine(void)
     unsigned int tr_count = 0;
     char line[1000];
     FILE *desthfp;
-    FASTASEQUENCE seq;
+    struct fastasequence seq;
 
     /* save names locally so they can be replaced later */
-    strcpy(source, paramset.inputfilename);
-    strcpy(prefix, paramset.outputprefix);
+    strcpy(source, paramset.ps_inputfilename);
+    strcpy(prefix, paramset.ps_outputprefix);
 
     /* open input file for reading */
-    if (paramset.use_stdin) {
+    if (paramset.ps_use_stdin) {
         srcfp = stdin;
     }
     else {
@@ -52,54 +52,54 @@ void TRFControlRoutine(void)
         if (srcfp == NULL) {
             sprintf(line, "Error opening %s: %s\n", source, strerror(errno));
             PrintError(line);
-            paramset.endstatus = "Bad filename";
-            paramset.running = 0;
+            paramset.ps_endstatus = "Bad filename";
+            paramset.ps_running = 0;
             return;
         }
     }
 
     /* get the first sequence */
-    if (paramset.ngs != 1)
+    if (paramset.ps_ngs != 1)
         PrintProgress("Loading sequence...");
 
     loadstatus = LoadSequenceFromFileEugene(&seq, srcfp);
     if (loadstatus < 0) {
         PrintError("Could not load sequence. Empty file or bad format.");
-        paramset.endstatus = "Bad format."; /* ok for now */
-        paramset.running = 0;
+        paramset.ps_endstatus = "Bad format."; /* ok for now */
+        paramset.ps_running = 0;
         fclose(srcfp);
         return;
     }
 
     /* generate the parameter string to be used in file names */
     sprintf(paramstring, "%d.%d.%d.%d.%d.%d.%d",
-        paramset.match, paramset.mismatch, paramset.indel,
-        paramset.PM, paramset.PI, paramset.minscore, paramset.maxperiod);
+        paramset.ps_match, paramset.ps_mismatch, paramset.ps_indel,
+        paramset.ps_PM, paramset.ps_PI, paramset.ps_minscore, paramset.ps_maxperiod);
 
     sprintf(hparameters, "Parameters: %d %d %d %d %d %d %d\n",
-        paramset.match, paramset.mismatch, paramset.indel,
-        paramset.PM, paramset.PI, paramset.minscore, paramset.maxperiod);
+        paramset.ps_match, paramset.ps_mismatch, paramset.ps_indel,
+        paramset.ps_PM, paramset.ps_PI, paramset.ps_minscore, paramset.ps_maxperiod);
 
     /* based on number of sequences in file use different approach */
     if (loadstatus == 0) {      /* only one sequence in file */
         sprintf(hsequence, "Sequence: %s\n", seq.name);
         sprintf(hlength, "Length:  %d", seq.length);
 
-        paramset.multisequencefile = 0;
-        paramset.sequenceordinal = 1;
+        paramset.ps_multisequencefile = 0;
+        paramset.ps_sequenceordinal = 1;
         /* call trf and return */
         counterInSeq = 0;
         TRF(&seq);
 
-        if (paramset.endstatus)
+        if (paramset.ps_endstatus)
             return;
 
-        if (paramset.datafile) {
+        if (paramset.ps_datafile) {
             /* Added by Yevgeniy Gelfand on Jan 27, 2010  */
             /* To have smaller sequences not send results */
             /* to disc to improve performance             */
 
-            if (paramset.ngs) {
+            if (paramset.ps_ngs) {
                 destdfp = stdout;
             }
             else {
@@ -112,10 +112,10 @@ void TRFControlRoutine(void)
             }
 
             {
-                IL *lpointer;
+                struct index_list *lpointer;
                 int charcount;
 
-                if (paramset.ngs != 1) {
+                if (paramset.ps_ngs != 1) {
                     fprintf(destdfp, "Tandem Repeats Finder Program written by:\n\n");
                     fprintf(destdfp, "Gary Benson\n");
                     fprintf(destdfp, "Program in Bioinformatics\n");
@@ -123,7 +123,7 @@ void TRFControlRoutine(void)
                     fprintf(destdfp, "Version %s\n", versionstring);
                 }
 
-                if (paramset.ngs) {
+                if (paramset.ps_ngs) {
                     /* only print if we have at least 1 record */
                     if (NULL != GlobalIndexList) {
                         fprintf(destdfp, "@%s\n", seq.name);
@@ -132,42 +132,42 @@ void TRFControlRoutine(void)
                 }
                 else {
                     fprintf(destdfp, "\n\nSequence: %s\n\n\n\nParameters: %d %d %d %d %d %d %d\n\n\n",
-                        seq.name, paramset.match, paramset.mismatch, paramset.indel, paramset.PM, paramset.PI,
-                        paramset.minscore, paramset.maxperiod);
+                        seq.name, paramset.ps_match, paramset.ps_mismatch, paramset.ps_indel, paramset.ps_PM, paramset.ps_PI,
+                        paramset.ps_minscore, paramset.ps_maxperiod);
                 }
 
-                for (lpointer = GlobalIndexList; lpointer != NULL; lpointer = lpointer->next) {
+                for (lpointer = GlobalIndexList; lpointer != NULL; lpointer = lpointer->il_next) {
                     fprintf(destdfp, "%d %d %d %.1f %d %d %d %d %d %d %d %d %.2f %s ",
-                        lpointer->first, lpointer->last, lpointer->period,
-                        lpointer->copies, lpointer->size, lpointer->matches,
-                        lpointer->indels, lpointer->score, lpointer->acount,
-                        lpointer->ccount, lpointer->gcount, lpointer->tcount, lpointer->entropy, lpointer->pattern);
-                    for (charcount = lpointer->first; charcount <= lpointer->last; charcount++)
+                        lpointer->il_first, lpointer->il_last, lpointer->il_period,
+                        lpointer->il_copies, lpointer->il_size, lpointer->il_matches,
+                        lpointer->il_indels, lpointer->il_score, lpointer->il_acount,
+                        lpointer->il_ccount, lpointer->il_gcount, lpointer->il_tcount, lpointer->il_entropy, lpointer->il_pattern);
+                    for (charcount = lpointer->il_first; charcount <= lpointer->il_last; charcount++)
                         fprintf(destdfp, "%c", Sequence[charcount]);
 
                     /* print short flanks to .dat file */
-                    if (paramset.ngs) {
+                    if (paramset.ps_ngs) {
                         int flankstart, flankend;
 
-                        flankstart = lpointer->first - 50;
+                        flankstart = lpointer->il_first - 50;
                         flankstart = max(1, flankstart);
-                        flankend = lpointer->last + 50;
+                        flankend = lpointer->il_last + 50;
                         flankend = min(Length, flankend);
 
                         fprintf(destdfp, " ");
-                        if (lpointer->first == 1) {
+                        if (lpointer->il_first == 1) {
                             fprintf(destdfp, ".");
                         }
                         else {
-                            for (charcount = flankstart; charcount < lpointer->first; charcount++)
+                            for (charcount = flankstart; charcount < lpointer->il_first; charcount++)
                                 fprintf(destdfp, "%c", Sequence[charcount]);
                         }
 
                         fprintf(destdfp, " ");
-                        if (lpointer->last == Length)
+                        if (lpointer->il_last == Length)
                             fprintf(destdfp, ".");
                         else
-                            for (charcount = lpointer->last + 1; charcount <= flankend; charcount++)
+                            for (charcount = lpointer->il_last + 1; charcount <= flankend; charcount++)
                                 fprintf(destdfp, "%c", Sequence[charcount]);
                     }
 
@@ -181,8 +181,8 @@ void TRFControlRoutine(void)
         {
             char maskstring[_MAX_PATH];
 
-            sprintf(maskstring, "%s.%s.mask", paramset.outputprefix, paramstring);
-            MakeMaskedFile(GlobalIndexList, paramset.maskedfile, Sequence, maskstring);
+            sprintf(maskstring, "%s.%s.mask", paramset.ps_outputprefix, paramstring);
+            MakeMaskedFile(GlobalIndexList, paramset.ps_maskedfile, Sequence, maskstring);
         }
 
         FreeList(GlobalIndexList);
@@ -197,13 +197,13 @@ void TRFControlRoutine(void)
             destdfp = NULL;
         }
 
-        paramset.endstatus = NULL;
-        paramset.running = 0;
+        paramset.ps_endstatus = NULL;
+        paramset.ps_running = 0;
         // return CTRL_SUCCESS;
         return;
     }
-    paramset.multisequencefile = 1;
-    paramset.sequenceordinal = 1;
+    paramset.ps_multisequencefile = 1;
+    paramset.ps_sequenceordinal = 1;
 
     /*
      *   if there are more files need to produce sumary-style
@@ -212,12 +212,12 @@ void TRFControlRoutine(void)
 
     /* generate the parameter string to be used in file names */
     sprintf(paramstring, "%d.%d.%d.%d.%d.%d.%d",
-        paramset.match, paramset.mismatch, paramset.indel,
-        paramset.PM, paramset.PI, paramset.minscore, paramset.maxperiod);
+        paramset.ps_match, paramset.ps_mismatch, paramset.ps_indel,
+        paramset.ps_PM, paramset.ps_PI, paramset.ps_minscore, paramset.ps_maxperiod);
 
     /* open sumary table file */
     sprintf(desth, "%s.%s.summary.html", prefix, paramstring);
-    if (!paramset.HTMLoff) {
+    if (!paramset.ps_HTMLoff) {
         desthfp = fopen(desth, "w");
         if (desthfp == NULL) {
             PrintError("Unable to open summary file for writing in TRFControlRoutine routine!");
@@ -226,7 +226,7 @@ void TRFControlRoutine(void)
     }
 
     /* open masked file if requested */
-    if (paramset.maskedfile) {
+    if (paramset.ps_maskedfile) {
         sprintf(destm, "%s.%s.mask", prefix, paramstring);
         destmfp = fopen(destm, "w");
         if (destmfp == NULL) {
@@ -236,8 +236,8 @@ void TRFControlRoutine(void)
     }
 
     /* open datafile if requested */
-    if (paramset.datafile) {
-        if (paramset.ngs) {
+    if (paramset.ps_datafile) {
+        if (paramset.ps_ngs) {
             destdfp = stdout;
         }
         else {
@@ -250,7 +250,7 @@ void TRFControlRoutine(void)
         }
     }
 
-    if (!paramset.HTMLoff) {
+    if (!paramset.ps_HTMLoff) {
         /* start output of sumary file */
         fprintf(desthfp, "<HTML>");
         fprintf(desthfp, "<HEAD>");
@@ -288,25 +288,25 @@ void TRFControlRoutine(void)
 
         // set the prefix to be used for naming of output
         sprintf(input, "%s.s%d", prefix, i);
-        strcpy(paramset.inputfilename, input);
-        strcpy(paramset.outputprefix, input);
+        strcpy(paramset.ps_inputfilename, input);
+        strcpy(paramset.ps_outputprefix, input);
 
         /* call the tandem repeats finder routine */
         counterInSeq = 0;
         TRF(&seq);
 
-        if (paramset.datafile) {
+        if (paramset.ps_datafile) {
 
             /* Added by Yevgeniy Gelfand on Jan 27, 2010  */
             /* To have smaller sequences not send results */
             /* to disc to improve performance             */
             {
-                IL *lpointer;
+                struct index_list *lpointer;
                 int charcount;
 
                 /* only for the first one write the header */
                 if (i == 1) {
-                    if (paramset.ngs != 1) {
+                    if (paramset.ps_ngs != 1) {
                         fprintf(destdfp, "Tandem Repeats Finder Program written by:\n\n");
                         fprintf(destdfp, "Gary Benson\n");
                         fprintf(destdfp, "Program in Bioinformatics\n");
@@ -315,7 +315,7 @@ void TRFControlRoutine(void)
                     }
                 }
 
-                if (paramset.ngs) {
+                if (paramset.ps_ngs) {
                     /* only print if we have at least 1 record */
                     if (NULL != GlobalIndexList) {
                         fprintf(destdfp, "@%s\n", seq.name);
@@ -323,43 +323,43 @@ void TRFControlRoutine(void)
                 }
                 else {
                     fprintf(destdfp, "\n\nSequence: %s\n\n\n\nParameters: %d %d %d %d %d %d %d\n\n\n",
-                        seq.name, paramset.match, paramset.mismatch, paramset.indel, paramset.PM, paramset.PI,
-                        paramset.minscore, paramset.maxperiod);
+                        seq.name, paramset.ps_match, paramset.ps_mismatch, paramset.ps_indel, paramset.ps_PM, paramset.ps_PI,
+                        paramset.ps_minscore, paramset.ps_maxperiod);
                 }
 
-                for (lpointer = GlobalIndexList; lpointer != NULL; lpointer = lpointer->next) {
+                for (lpointer = GlobalIndexList; lpointer != NULL; lpointer = lpointer->il_next) {
                     fprintf(destdfp, "%d %d %d %.1f %d %d %d %d %d %d %d %d %.2f %s ",
-                        lpointer->first, lpointer->last, lpointer->period,
-                        lpointer->copies, lpointer->size, lpointer->matches,
-                        lpointer->indels, lpointer->score, lpointer->acount,
-                        lpointer->ccount, lpointer->gcount, lpointer->tcount, lpointer->entropy, lpointer->pattern);
-                    for (charcount = lpointer->first; charcount <= lpointer->last; charcount++)
+                        lpointer->il_first, lpointer->il_last, lpointer->il_period,
+                        lpointer->il_copies, lpointer->il_size, lpointer->il_matches,
+                        lpointer->il_indels, lpointer->il_score, lpointer->il_acount,
+                        lpointer->il_ccount, lpointer->il_gcount, lpointer->il_tcount, lpointer->il_entropy, lpointer->il_pattern);
+                    for (charcount = lpointer->il_first; charcount <= lpointer->il_last; charcount++)
                         fprintf(destdfp, "%c", Sequence[charcount]);
 
                     /* print short flanks to .dat file */
-                    if (paramset.ngs) {
+                    if (paramset.ps_ngs) {
                         int flankstart, flankend;
 
-                        flankstart = lpointer->first - 50;
+                        flankstart = lpointer->il_first - 50;
                         flankstart = max(1, flankstart);
-                        flankend = lpointer->last + 50;
+                        flankend = lpointer->il_last + 50;
                         flankend = min(Length, flankend);
 
                         fprintf(destdfp, " ");
-                        if (lpointer->first == 1) {
+                        if (lpointer->il_first == 1) {
                             fprintf(destdfp, ".");
                         }
                         else {
-                            for (charcount = flankstart; charcount < lpointer->first; charcount++)
+                            for (charcount = flankstart; charcount < lpointer->il_first; charcount++)
                                 fprintf(destdfp, "%c", Sequence[charcount]);
                         }
 
                         fprintf(destdfp, " ");
-                        if (lpointer->last == Length) {
+                        if (lpointer->il_last == Length) {
                             fprintf(destdfp, ".");
                         }
                         else {
-                            for (charcount = lpointer->last + 1; charcount <= flankend; charcount++)
+                            for (charcount = lpointer->il_last + 1; charcount <= flankend; charcount++)
                                 fprintf(destdfp, "%c", Sequence[charcount]);
                         }
                     }
@@ -369,14 +369,14 @@ void TRFControlRoutine(void)
             }
         }
 
-        if (!paramset.HTMLoff) {
+        if (!paramset.ps_HTMLoff) {
             /* print table rows based on repeat count */
             sprintf(outh, "%s.%s.1.html", input, paramstring);
-            if (paramset.outputcount > 0) {
+            if (paramset.ps_outputcount > 0) {
                 /* print a table raw to the summary table */
                 fprintf(desthfp, "<TR><TD><CENTER>%d</CENTER></TD>"
                     "<TD><CENTER><A TARGET=\"%s\" HREF=\"%s\">%s</A>"
-                    "</CENTER></TD><TD><CENTER>%d</CENTER></TD></TR>", i, outh, outh, seq.name, paramset.outputcount);
+                    "</CENTER></TD><TD><CENTER>%d</CENTER></TD></TR>", i, outh, outh, seq.name, paramset.ps_outputcount);
                 foundsome = 1;
             }
             else {
@@ -392,11 +392,11 @@ void TRFControlRoutine(void)
             char maskstring[_MAX_PATH];
 
             sprintf(maskstring, "%s.s%d.%s.mask", prefix, i, paramstring);
-            MakeMaskedFile(GlobalIndexList, paramset.maskedfile, Sequence, maskstring);
+            MakeMaskedFile(GlobalIndexList, paramset.ps_maskedfile, Sequence, maskstring);
         }
 
         /* append new output to destination files */
-        if (paramset.maskedfile) {
+        if (paramset.ps_maskedfile) {
             /* recreate the name of the masked sequence file */
             sprintf(outm, "%s.s%d.%s.mask", prefix, i, paramstring);
             outmfp = fopen(outm, "r");
@@ -426,11 +426,11 @@ void TRFControlRoutine(void)
 
         /* if more sequences load and repeat */
         if (loadstatus > 0) {
-            if (paramset.ngs != 1)
+            if (paramset.ps_ngs != 1)
                 PrintProgress("Loading sequence file...");
 
             loadstatus = LoadSequenceFromFileEugene(&seq, srcfp);
-            paramset.sequenceordinal++;
+            paramset.ps_sequenceordinal++;
             i++;
         }
         else {
@@ -438,7 +438,7 @@ void TRFControlRoutine(void)
         }
     }
 
-    if (!paramset.HTMLoff) {
+    if (!paramset.ps_HTMLoff) {
         /* close table and html body */
         fprintf(desthfp, "\n</TABLE>\n");
         if (!foundsome) {
@@ -449,20 +449,20 @@ void TRFControlRoutine(void)
 
     /* close files */
     fclose(srcfp);
-    if (paramset.maskedfile)
+    if (paramset.ps_maskedfile)
         fclose(destmfp);
 
-    if (paramset.datafile)
+    if (paramset.ps_datafile)
         fclose(destdfp);
 
-    if (!paramset.HTMLoff)
+    if (!paramset.ps_HTMLoff)
         fclose(desthfp);
 
     /* set output file name to the summary table */
-    strcpy(paramset.outputfilename, desth);
+    strcpy(paramset.ps_outputfilename, desth);
 
-    paramset.endstatus = NULL;
-    paramset.running = 0;
+    paramset.ps_endstatus = NULL;
+    paramset.ps_running = 0;
     return;
 }
 
@@ -470,7 +470,7 @@ void TRFControlRoutine(void)
  *   This routine acts on single-sequence files and
  *   is used by the control routine above.
  */
-void TRF(FASTASEQUENCE *pseq)
+void TRF(struct fastasequence *pseq)
 {
     unsigned int i;             /* used at the end to free memory */
     int *stemp;
@@ -480,15 +480,15 @@ void TRF(FASTASEQUENCE *pseq)
     init_bestperiodlist();
 
     /*  Set global print_flanking that controls the generation of flanking */
-    print_flanking = paramset.flankingsequence;
+    print_flanking = paramset.ps_flankingsequence;
 
     /* allocate memory for file names */
-    if (paramset.ngs != 1)
+    if (paramset.ps_ngs != 1)
         PrintProgress("Allocating Memory...");
 
     /* change made for NGS data analysis */
     /* make MAXWRAPLENGTH = 1000 for smaller for small sequences */
-    maxwraplength = min(paramset.maxwraplength, pseq->length);
+    maxwraplength = min(paramset.ps_maxwraplength, pseq->length);
 
     /* allocate memory */
     S = (int **)malloc((maxwraplength + 1) * sizeof(int *));
@@ -520,30 +520,30 @@ void TRF(FASTASEQUENCE *pseq)
     /* AlignPair holds the characters and alignments of the current */
     /* primary and secondary sequences  */
     AlignPair.textprime = newAlignPairtext(2 * maxwraplength);
-    if (paramset.endstatus)
+    if (paramset.ps_endstatus)
         return;
 
     AlignPair.textsecnd = newAlignPairtext(2 * maxwraplength);
-    if (paramset.endstatus)
+    if (paramset.ps_endstatus)
         return;
 
     AlignPair.indexprime = newAlignPairindex(2 * maxwraplength);
-    if (paramset.endstatus)
+    if (paramset.ps_endstatus)
         return;
     
     AlignPair.indexsecnd = newAlignPairindex(2 * maxwraplength);
-    if (paramset.endstatus) 
+    if (paramset.ps_endstatus) 
         return;
 
     /* set algorithm's parameters */
-    Alpha = paramset.match;
-    Beta = -paramset.mismatch;
-    Delta = -paramset.indel;
-    PM = paramset.PM;
-    PI = paramset.PI;
-    Minscore = paramset.minscore;
-    MaxPeriod = paramset.maxperiod;
-    MAXDISTANCE = MAXPATTERNSIZE = paramset.maxperiod;
+    Alpha = paramset.ps_match;
+    Beta = -paramset.ps_mismatch;
+    Delta = -paramset.ps_indel;
+    PM = paramset.ps_PM;
+    PI = paramset.ps_PI;
+    Minscore = paramset.ps_minscore;
+    MaxPeriod = paramset.ps_maxperiod;
+    MAXDISTANCE = MAXPATTERNSIZE = paramset.ps_maxperiod;
     if (MAXDISTANCE < 500) {
         MAXDISTANCE = MAXPATTERNSIZE = 500;
     }
@@ -553,8 +553,8 @@ void TRF(FASTASEQUENCE *pseq)
 
     /* generate the parameter string to be used in file names */
     sprintf(paramstring, "%d.%d.%d.%d.%d.%d.%d",
-        paramset.match, paramset.mismatch, paramset.indel,
-        paramset.PM, paramset.PI, paramset.minscore, paramset.maxperiod);
+        paramset.ps_match, paramset.ps_mismatch, paramset.ps_indel,
+        paramset.ps_PM, paramset.ps_PI, paramset.ps_minscore, paramset.ps_maxperiod);
 
     Reportmin = 0;
     ldong = 0;
@@ -563,13 +563,13 @@ void TRF(FASTASEQUENCE *pseq)
     Test = 1;
 
     /* print the names of the files */
-    snprintf(htmlstring, sizeof htmlstring, "%s.%s.html", paramset.outputprefix, paramstring);
-    snprintf(txtstring, sizeof txtstring, "%s.%s.txt.html", paramset.outputprefix, paramstring);
-    snprintf(datstring, sizeof datstring, "%s.%s.dat", paramset.outputprefix, paramstring);
-    snprintf(maskstring, sizeof maskstring, "%s.%s.mask", paramset.outputprefix, paramstring);
+    snprintf(htmlstring, sizeof htmlstring, "%s.%s.html", paramset.ps_outputprefix, paramstring);
+    snprintf(txtstring, sizeof txtstring, "%s.%s.txt.html", paramset.ps_outputprefix, paramstring);
+    snprintf(datstring, sizeof datstring, "%s.%s.dat", paramset.ps_outputprefix, paramstring);
+    snprintf(maskstring, sizeof maskstring, "%s.%s.mask", paramset.ps_outputprefix, paramstring);
 
     /* start txt file */
-    if (!paramset.HTMLoff) {
+    if (!paramset.ps_HTMLoff) {
         Fptxt = fopen(txtstring, "w");
         if (Fptxt == NULL) {
             PrintError("Unable to open alignment file for writing in TRF() routine!");
@@ -590,11 +590,11 @@ void TRF(FASTASEQUENCE *pseq)
         fprintf(Fptxt, "\n\nVersion %s", versionstring);
 
         fprintf(Fptxt, "\n\nSequence: %s\n\nParameters: %d %d %d %d %d %d %d\n",
-            pseq->name, paramset.match, paramset.mismatch, paramset.indel,
-            paramset.PM, paramset.PI, paramset.minscore, paramset.maxperiod);
+            pseq->name, paramset.ps_match, paramset.ps_mismatch, paramset.ps_indel,
+            paramset.ps_PM, paramset.ps_PI, paramset.ps_minscore, paramset.ps_maxperiod);
     }
 
-    if (paramset.ngs != 1)
+    if (paramset.ps_ngs != 1)
         PrintProgress("Initializing data structures...");
 
     Distance = new_distancelist();
@@ -608,7 +608,7 @@ void TRF(FASTASEQUENCE *pseq)
     /* modified 5/23/05 G. Benson */
     init_distanceseenarray();
 
-    if (paramset.ngs != 1)
+    if (paramset.ps_ngs != 1)
         PrintProgress("Computing TR Model Statistics...");
 
     init_and_fill_coin_toss_stats2000_with_4tuplesizes();
@@ -625,7 +625,7 @@ void TRF(FASTASEQUENCE *pseq)
     Sequence = pseq->sequence - 1;  /* start one character before */
     Length = pseq->length;
 
-    if (!paramset.HTMLoff) {
+    if (!paramset.ps_HTMLoff) {
         fprintf(Fptxt, "\n\nLength: %d", Length);
         fprintf(Fptxt, "\nACGTcount: A:%3.2f, C:%3.2f, G:%3.2f, T:%3.2f\n\n",
             (double)pseq->composition['A' - 'A'] / Length,
@@ -669,12 +669,12 @@ void TRF(FASTASEQUENCE *pseq)
         exit(-7);
     }
 
-    if (paramset.multisequencefile) {
-        sprintf(messagebuffer, "Scanning Sequence %d...", paramset.sequenceordinal);
-        if (paramset.ngs != 1)
+    if (paramset.ps_multisequencefile) {
+        sprintf(messagebuffer, "Scanning Sequence %d...", paramset.ps_sequenceordinal);
+        if (paramset.ps_ngs != 1)
             PrintProgress(messagebuffer);
     }
-    else if (paramset.ngs != 1) {
+    else if (paramset.ps_ngs != 1) {
         PrintProgress("Scanning...");
     }
 
@@ -691,7 +691,7 @@ void TRF(FASTASEQUENCE *pseq)
             Wasted_total += (Criteria_count[i] + Consensus_count[i]) * i * (2 * d_range(i) + 1) * 2;
     }
 
-    if (!paramset.HTMLoff) {
+    if (!paramset.ps_HTMLoff) {
         fprintf(Fptxt, "Done.\n");
         fprintf(Fptxt, "</PRE>");
         fprintf(Fptxt, "</BODY>");
@@ -706,7 +706,7 @@ void TRF(FASTASEQUENCE *pseq)
      * global variables this could be impossible to fix.
      *****************************************************************/
 
-    if (paramset.ngs != 1)
+    if (paramset.ps_ngs != 1)
         PrintProgress("Freeing Memory...");
 
     free(S[0]);
@@ -735,18 +735,18 @@ void TRF(FASTASEQUENCE *pseq)
 
     free(Sortmultiples);
 
-    if (paramset.ngs != 1)
+    if (paramset.ps_ngs != 1)
         PrintProgress("Resolving output...");
 
     TRFClean(datstring, txtstring, MaxPeriod);
 
     /* Set the name of the outputfilename global to name given to
      * file in routines defined in trfclean.h */
-    MakeFileName(paramset.outputfilename, htmlstring, 1);
+    MakeFileName(paramset.ps_outputfilename, htmlstring, 1);
 
     free_bestperiodlist();
 
-    if (paramset.ngs != 1)
+    if (paramset.ps_ngs != 1)
         PrintProgress("Done.");
 }
 
@@ -766,7 +766,7 @@ void SetProgressBar(void)
     static int ready = 0;
 
     /* if percent is minus one then un-ready the progress indicator */
-    if (paramset.percent < 0) {
+    if (paramset.ps_percent < 0) {
         if (!ready)
             return;
 
@@ -785,10 +785,10 @@ void SetProgressBar(void)
     }
 
     /* set progress indicator to percent value */
-    if (paramset.percent > 100)
-        paramset.percent = 100;
+    if (paramset.ps_percent > 100)
+        paramset.ps_percent = 100;
 
-    if (!(paramset.percent % 5))
+    if (!(paramset.ps_percent % 5))
         putchar('.');
 }
 
@@ -801,7 +801,7 @@ void SetProgressBar(void)
  *   The member sequence must be NULL before the routine is called.
  *   The calling function must free the allocated memory after use.
  */
-int LoadSequenceFromFileEugene(FASTASEQUENCE *pseq, FILE *fp)
+int LoadSequenceFromFileEugene(struct fastasequence *pseq, FILE *fp)
 {
     int i, j, c;
     int next = -1;              // whether a next sequence was encountered
