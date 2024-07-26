@@ -20,6 +20,8 @@ License along with TRF.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include <stdlib.h>
+#include <string.h>
+#include <stdarg.h>
 #include <math.h>
 
 #include "tr30dat.h"
@@ -27,21 +29,25 @@ License along with TRF.  If not, see <https://www.gnu.org/licenses/>.
 /* This is a test version which contains the narrow band alignment routines
    narrowbnd.c, prscores.c, pairalgn.c */
 
-#define new1Darrayfunc(type,functionname,length)\
-    type *functionname(int length)\
-{\
-    type *objptr=calloc(length,sizeof(*objptr));\
-    if (objptr==NULL)\
-    {\
-        paramset.endstatus = "functionname: Out of memory!";\
-        return NULL;\
-    }\
-    return objptr;\
+char* newAlignPairtext(int length)
+{
+    return malloc(length);
 }
-new1Darrayfunc(char, newAlignPairtext, length)
-new1Darrayfunc(char, newLine, length)
-new1Darrayfunc(int, newAlignPairindex, length)
-new1Darrayfunc(int, newTags, length)
+
+char* newLine(int length)
+{
+    return malloc(length);
+}
+
+int* newAlignPairindex(int length)
+{
+    return calloc(length, sizeof(int));
+}
+
+int* newTags(int length)
+{
+    return calloc(length, sizeof(int));
+}
 
 int d_range(int d)
 {
@@ -78,7 +84,7 @@ void init_sm(int match, int mismatch)
     SM['T' * 256 + 'T'] = match;
 }
 
-void init_index()
+void init_index(void)
 {
     /* index has 256 entries so that finding the entries for A, C, G and T */
     /* require no calculation */
@@ -856,6 +862,11 @@ void init_distanceseenarray(void)
         trf_message("\nInit Distanceseenarray: Out of memory!");
         exit(-1);
     }
+}
+
+void distanceentry_free(void)
+{
+    free(_DistanceEntries);
 }
 
 void free_distanceseenarray(void)
@@ -1838,7 +1849,7 @@ void get_consensus(int patternlength)
 
 struct distanceentry *_DistanceEntries;
 
-struct distancelist *new_distancelist()
+struct distancelist *new_distancelist(void)
 {
     int g, N, K;
     struct distanceentry *ptr;
@@ -1848,6 +1859,7 @@ struct distancelist *new_distancelist()
     K = Min_Distance_Entries + 1;
     N = MAXDISTANCE + 1;
     ptr = _DistanceEntries = malloc(((K + N) * (N - K + 1) / 2 + K * (K - 1)) * sizeof(struct distanceentry));
+    // TODO: add error handling. boa@20240726
 
     for (g = 1; g <= MAXDISTANCE; g++) {
         objptr[g].entry = ptr;
@@ -1868,7 +1880,7 @@ void clear_distancelist(struct distancelist *objptr)
     }
 }
 
-void init_links()
+void init_links(void)
 {
     Distance[0].linkup = MAXDISTANCE + 1;
 }
@@ -3734,5 +3746,20 @@ void newtupbo(void)
         SetProgressBar();
 
     free(Bandcenter);
+}
+
+void trf_message(char *format, ...)
+{
+    va_list argp;
+
+    if (format == NULL)
+        return;
+
+    va_start(argp, format);
+
+    if (!paramset.HTMLoff)
+        vfprintf(Fptxt, format, argp);
+
+    va_end(argp);
 }
 

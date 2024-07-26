@@ -42,15 +42,6 @@ int counterInSeq = 0;
 #define _MAX_PATH 260
 #endif
 
-/* all include  libraries */
-#include <stdio.h>
-#include <stddef.h>             /* has size_t definition */
-#include <stdlib.h>             /* has calloc definition */
-#include <ctype.h>              /* includes toupper(c) */
-#include <string.h>             /* includes strncat() */
-#include <math.h>               /* for ceil function */
-#include <stdarg.h>             /* for trf_message() function */
-
 /* use semantic versioning, please: https://semver.org/ */
 #ifndef PACKAGE_VERSION
 #define versionstring "4.10.0"
@@ -479,19 +470,23 @@ typedef struct {
 
 } FASTASEQUENCE;
 
-void trf_message(char *format, ...)
-{
-    va_list argp;
+void trf_message(char *format, ...);
 
-    if (format == NULL)
-        return;
-
-    va_start(argp, format);
-
-    if (!paramset.HTMLoff)
-        vfprintf(Fptxt, format, argp);
-
-    va_end(argp);
-}
+char* newAlignPairtext(int length);
+char* newLine(int length);
+int* newAlignPairindex(int length);
+int* newTags(int length);
+void init_bestperiodlist(void);
+struct distancelist *new_distancelist(void);
+void clear_distancelist(struct distancelist *objptr);
+void init_links(void);
+void init_index(void);
+void init_distanceseenarray(void);
+void init_and_fill_coin_toss_stats2000_with_4tuplesizes(void);
+void newtupbo(void);
+int d_range(int d);
+void free_distanceseenarray(void);
+void distanceentry_free(void);
+void free_bestperiodlist(void);
 
 #endif

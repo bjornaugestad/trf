@@ -19,7 +19,11 @@ You should have received a copy of the GNU Affero General Public
 License along with TRF.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#include <string.h>
+#include <math.h>
+
 #include "trfrun.h"
+#include "tr30dat.h"
 
 /* This routine can act on a multiple-sequence file
  * and calls TRF() routine as many times as it needs to. */
@@ -721,8 +725,7 @@ void TRF(FASTASEQUENCE *pseq)
     free_distanceseenarray();
 
     /* free distance list and all its entries */
-    //for(i=1;i<=MAXDISTANCE;i++) free(Distance[i].entry);
-    free(_DistanceEntries);
+    distanceentry_free();
     free(Distance);
 
     for (i = 1; i <= NTS; i++) {
@@ -882,4 +885,3 @@ int LoadSequenceFromFileEugene(FASTASEQUENCE *pseq, FILE *fp)
     return next;
 }
 
-#endif

@@ -81,7 +81,6 @@ void FreeList(IL * headptr);
 /* end of changes  on Jan 27, 2010  */
 
 #include "tr30dat.h"
-#include "tr30dat.c"
 #include "trfclean.h"
 
 #ifndef _MAX_PATH
