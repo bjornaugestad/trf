@@ -1,21 +1,21 @@
 
 /*
-Tandem Repeats Finder 
+Tandem Repeats Finder
 Copyright (C) 1999-2020 Gary Benson
 
 This file is part of the Tandem Repeats Finder (TRF) program.
 
-TRF is free software: you can redistribute it and/or modify 
-it under the terms of the GNU Affero General Public License as 
-published by the Free Software Foundation, either version 3 of 
+TRF is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of
 the License, or (at your option) any later version.
 
-TRF is distributed in the hope that it will be useful, but 
+TRF is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See 
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See
 the GNU Affero General Public License for more details.
 
-You should have received a copy of the GNU Affero General Public 
+You should have received a copy of the GNU Affero General Public
 License along with TRF.  If not, see <https://www.gnu.org/licenses/>.
 */
 
@@ -36,15 +36,15 @@ License along with TRF.  If not, see <https://www.gnu.org/licenses/>.
    narrowbnd.c, prscores.c, pairalgn.c */
 
 #define new1Darrayfunc(type,functionname,length)\
-	type *functionname(int length)\
+    type *functionname(int length)\
 {\
-	type *objptr=calloc(length,sizeof(*objptr));\
-	if(objptr==NULL)\
-	{\
-		paramset.endstatus = "functionname: Out of memory!";\
-		return NULL;\
-	}\
-	return(objptr);\
+    type *objptr=calloc(length,sizeof(*objptr));\
+    if (objptr==NULL)\
+    {\
+        paramset.endstatus = "functionname: Out of memory!";\
+        return NULL;\
+    }\
+    return objptr;\
 }
 new1Darrayfunc(char, newAlignPairtext, length)
 new1Darrayfunc(char, newLine, length)
@@ -123,42 +123,42 @@ void init_index()
 
 /* *pcurr>=maxscore added 2.17.05 gary benson -- to extend alignment as far as possible */
 #define test_trace_and_backwards_maxscore \
-	if((realr<=start-size)&&(*pcurr==0))\
+    if ((realr<=start-size)&&(*pcurr==0))\
 pleft=(*pcurr=-1000);\
 else end_of_trace=FALSE;\
-if(*pcurr>=maxscore)\
+if (*pcurr>=maxscore)\
 {\
-	maxscore=*pcurr;\
-	minrealrow=realr;\
-	mincol=c;\
-	/***6/9/05 G. Benson***/ mincolbandcenter=Bandcenter[r];\
-	/*** 6/14/05 G. Benson ***/ mincolposition=i;\
+    maxscore=*pcurr;\
+    minrealrow=realr;\
+    mincol=c;\
+    /***6/9/05 G. Benson***/ mincolbandcenter=Bandcenter[r];\
+    /*** 6/14/05 G. Benson ***/ mincolposition=i;\
 }
 
 #define test_maxrowscore_with_match \
-	if(*pcurr>maxrowscore)\
+    if (*pcurr>maxrowscore)\
 {\
-	maxrowscore=*pcurr;\
-	if((*pcurr==*pdiag)&&(match_yes_no==Alpha))\
-	matchatmax_col=c;\
-	else matchatmax_col=-2;\
+    maxrowscore=*pcurr;\
+    if ((*pcurr==*pdiag)&&(match_yes_no==Alpha))\
+    matchatmax_col=c;\
+    else matchatmax_col=-2;\
 }
 
 #define test_maxrowscore_without_match \
-	if(*pcurr>maxrowscore)\
+    if (*pcurr>maxrowscore)\
 matchatmax_col=-2;
 
 /* *pcurr>=maxscore added 2.17.05 gary benson -- to extend alignment as far as possible */
 #define test_trace_and_forward_maxscore \
-	if((realr>=start)&&(*pcurr==0))\
+    if ((realr>=start)&&(*pcurr==0))\
 pleft=(*pcurr=-1000);\
 else end_of_trace=FALSE;\
-if(*pcurr>=maxscore)\
+if (*pcurr>=maxscore)\
 {\
-	maxscore=*pcurr;\
-	maxrealrow=realr;\
-	maxrow=r;\
-	maxcol=c;\
+    maxscore=*pcurr;\
+    maxrealrow=realr;\
+    maxrow=r;\
+    maxcol=c;\
 }
 
 /*******************************************************************/
@@ -378,7 +378,7 @@ void narrowbandwrap(int start, int size, int bandradius, int bandradiusforward, 
         /* initialize top row */
 
         /*** 6/14/05 G. Benson ***/
-        /* set zero at mincol, not at bandcenter, which is now mincolbandcenter, 
+        /* set zero at mincol, not at bandcenter, which is now mincolbandcenter,
          * so that forward alignment starts out the same as backwards alignment ended. */
         zeroat = mincolposition - w;
 
@@ -542,16 +542,16 @@ void narrowbandwrap(int start, int size, int bandradius, int bandradiusforward, 
 /*******************************************************************/
 
 #define global_test_maxrowscore_with_match \
-	if(*pcurr>maxrowscore)\
+    if (*pcurr>maxrowscore)\
 {\
-	maxrowscore=*pcurr;\
-	if((*pcurr==*pdiag)&&(match_yes_no==Alpha))\
-	matchatmax_col=c;\
-	else matchatmax_col=-2;\
+    maxrowscore=*pcurr;\
+    if ((*pcurr==*pdiag)&&(match_yes_no==Alpha))\
+    matchatmax_col=c;\
+    else matchatmax_col=-2;\
 }
 
 #define global_test_maxrowscore_without_match \
-	if(*pcurr>maxrowscore)\
+    if (*pcurr>maxrowscore)\
 matchatmax_col=-2;
 
 /*******************************************************************/
@@ -888,8 +888,8 @@ void add_to_bestperiodlist(int d)
 
 /*** modified 6/2/05 G. Benson ***/
 void adjust_bestperiod_entry(int d)
-    /* shortens length of best period entry if the consensus alignment 
-     * turns out to be shorter than the first alignment; similar 
+    /* shortens length of best period entry if the consensus alignment
+     * turns out to be shorter than the first alignment; similar
      * to distanceseen */
 {
     struct bestperiodlistelement *ptr;
@@ -947,11 +947,11 @@ int search_for_range_in_bestperiodlist(int start, int distance)
                     || (entry->best3 == distance)
                     || (entry->best4 == distance)
                     || (entry->best5 == distance))
-                    return (TRUE);
+                    return TRUE;
 
                 /* change 1 */
                 /*
-                 * 
+                 *
                  * if(XYZ(entry->best1,distance)
                  * ||XYZ(entry->best2,distance)
                  * ||XYZ(entry->best3,distance)
@@ -966,9 +966,9 @@ int search_for_range_in_bestperiodlist(int start, int distance)
         entry = entry->next;
     }
     if (!range_covered)
-        return (TRUE);
+        return TRUE;
     else
-        return (FALSE);
+        return FALSE;
 
 }
 
@@ -1000,7 +1000,7 @@ void free_distanceseenarray(void)
 /*******************************************************************/
 void add_to_distanceseenarray(int location, int distance, int end, int score)
     /* created 5/23/05 G. Benson */
-    /* adds the extent of an alignment (end) at the given distance 
+    /* adds the extent of an alignment (end) at the given distance
      * location and score are not currently used */
 {
     struct distanceseenarrayelement *ptr;
@@ -1018,7 +1018,7 @@ void add_to_distanceseenarray(int location, int distance, int end, int score)
 /*******************************************************************/
 int search_for_distance_match_in_distanceseenarray(int distance, int start)
     /* created 5/23/05 G. Benson */
-    /* searches for an alignment with patternsize of distance in the region 
+    /* searches for an alignment with patternsize of distance in the region
      * including start.  True means found and alignment should be blocked. */
 {
     struct distanceseenarrayelement ptr;
@@ -1026,9 +1026,9 @@ int search_for_distance_match_in_distanceseenarray(int distance, int start)
     ptr = Distanceseenarray[distance];
 
     if (ptr.end >= start)
-        return (TRUE);
+        return TRUE;
     else
-        return (FALSE);
+        return FALSE;
 }
 
 /*******************************************************************/
@@ -1082,7 +1082,7 @@ void add_to_distanceseenlist(int location, int distance, int end, int score, int
 
     /* 3/15/02 Gary Benson
      * fix to remove from Distanceseenlist the first report of a repeat when
-     * it blocks further along in the sequence than reported by the consensus 
+     * it blocks further along in the sequence than reported by the consensus
      * sequence */
     entry = Distanceseenlist->next;
     /*
@@ -1092,7 +1092,7 @@ void add_to_distanceseenlist(int location, int distance, int end, int score, int
     if ((acceptstatus == WITHCONSENSUS) /* removed matching d because consensussize may be different */
         &&(location == entry->index) && (end <= entry->end) && ((distance <= 250) || (distance == entry->distance))) {  /* put back d match unless d under 250 */
         /* don't remove Distanceseenlist element,
-         * but make end=0 so it will be removed by 
+         * but make end=0 so it will be removed by
          * search_for_distance_in_distanceseenlist
          * procedure */
         entry->end = 0;
@@ -1123,8 +1123,8 @@ void add_to_distanceseenlist(int location, int distance, int end, int score, int
 /*******************************************************************/
 
 int search_for_distance_match_in_distanceseenlist(int distance, int start)
-    /* tests for exact same distance or a difference in distance 
-     * of less equal 2; finding a match means ruling 
+    /* tests for exact same distance or a difference in distance
+     * of less equal 2; finding a match means ruling
      * out redoing the alignment with that distance */
     /* later, should include a test based on multiples where the actual
      * score and the theoretical best score (all matches) are compared; if
@@ -1162,14 +1162,14 @@ int search_for_distance_match_in_distanceseenlist(int distance, int start)
             else
                 absdiff = entry->distance - distance;
             if (absdiff == 0) {
-                return (TRUE);
+                return TRUE;
             }
             /* new idea 2/11/05 use an extra field called changed_from_distance to store the old distance
              * when you have a consensus.  In search_for_distance_on_distanceseen_list, if distance doesn't
              * match, but is close, say within 5, then also look at changed_from_distance for a match.
              */
             else if ((absdiff <= 5) && (distance == entry->changed_from_distance)) {
-                return (TRUE);
+                return TRUE;
             }
 
         }
@@ -1177,7 +1177,7 @@ int search_for_distance_match_in_distanceseenlist(int distance, int start)
         entrylast = entry;
         entry = entry->next;
     }
-    return (FALSE);
+    return FALSE;
 
 }
 
@@ -1193,91 +1193,91 @@ void get_narrowband_pair_alignment_with_copynumber(int size, int bandradius, int
 
 /* ending at row Maxrow and column Maxcol */
 #define test_match_mismatch \
-	if (S[r][i]==S[r-1][upi-1]+match(x[realr], y[c]))\
+    if (S[r][i]==S[r-1][upi-1]+match(x[realr], y[c]))\
 {\
-	length++;\
-	if(c==fullcopy)Copynumber++;\
-	if(option==LOCAL){fill_align_pair(x[realr],y[c],length,realr,c);c=(c-1+size)%size;}\
-	else {fill_align_pair(x[realr],y[c],length,realr,c+Maxrealcol-Maxcol);c=c-1;}\
-	realr--;\
-	r--;\
-	i=upi-1;\
+    length++;\
+    if (c==fullcopy)Copynumber++;\
+    if (option==LOCAL){fill_align_pair(x[realr],y[c],length,realr,c);c=(c-1+size)%size;}\
+    else {fill_align_pair(x[realr],y[c],length,realr,c+Maxrealcol-Maxcol);c=c-1;}\
+    realr--;\
+    r--;\
+    i=upi-1;\
 }\
 else
 #define test_up \
-	if (S[r][i]==S[r-1][upi]+Delta)\
+    if (S[r][i]==S[r-1][upi]+Delta)\
 {\
-	length++;\
-	if(option==LOCAL) {fill_align_pair(x[realr],'-',length,realr,(c+1)%size);}\
-	else {fill_align_pair(x[realr],'-',length,realr,c+1+Maxrealcol-Maxcol);}\
-	realr--;\
-	r--;\
-	i=upi;\
+    length++;\
+    if (option==LOCAL) {fill_align_pair(x[realr],'-',length,realr,(c+1)%size);}\
+    else {fill_align_pair(x[realr],'-',length,realr,c+1+Maxrealcol-Maxcol);}\
+    realr--;\
+    r--;\
+    i=upi;\
 }\
 else
 #define test_left \
-	if(i==0)\
+    if (i==0)\
 {\
-	trf_message("\nget_pair_alignment_with_copynumber: error in trace back");\
-	trf_message("\nattempted to compute left branch when i==0");\
-	trf_message("\nS[%d][%d]=%d",r,i,S[r][i]);\
-	break;\
+    trf_message("\nget_pair_alignment_with_copynumber: error in trace back");\
+    trf_message("\nattempted to compute left branch when i==0");\
+    trf_message("\nS[%d][%d]=%d",r,i,S[r][i]);\
+    break;\
 }\
 else if (S[r][i]==S[r][i-1]+Delta)\
 {\
-	length++;\
-	if(c==fullcopy)Copynumber++;\
-	if(option==LOCAL){fill_align_pair('-',y[c],length,realr+1,c);c=(c-1+size)%size;}\
-	else {fill_align_pair('-',y[c],length,realr+1,c+Maxrealcol-Maxcol);c=c-1;}\
-	i=i-1;\
+    length++;\
+    if (c==fullcopy)Copynumber++;\
+    if (option==LOCAL){fill_align_pair('-',y[c],length,realr+1,c);c=(c-1+size)%size;}\
+    else {fill_align_pair('-',y[c],length,realr+1,c+Maxrealcol-Maxcol);c=c-1;}\
+    i=i-1;\
 }\
 else
 #define report_error_match_up_left \
 {\
-	trf_message("\nget_pair_alignment_with_copynumber: error in trace back");\
-	trf_message("\nS: row=%d  column=%d  upi=%d  Sequence: realrow=%d  EC: realcol=%d",\
-			r,i,upi,realr,c);\
-	trf_message("\nS=%d  Sleft=%d  Sup=%d  Sdiag=%d  match=%d",\
-			S[r][i],S[r][i-1],S[r-1][upi],\
-			S[r-1][upi-1],match(x[realr], y[c]));\
-	break;\
+    trf_message("\nget_pair_alignment_with_copynumber: error in trace back");\
+    trf_message("\nS: row=%d  column=%d  upi=%d  Sequence: realrow=%d  EC: realcol=%d",\
+            r,i,upi,realr,c);\
+    trf_message("\nS=%d  Sleft=%d  Sup=%d  Sdiag=%d  match=%d",\
+            S[r][i],S[r][i-1],S[r-1][upi],\
+            S[r-1][upi-1],match(x[realr], y[c]));\
+    break;\
 }
 #define report_error_match_left \
 {\
-	trf_message("\nget_pair_alignment_with_copynumber: error in trace back");\
-	trf_message("\nS: row=%d  column=%d  Sequence: realrow=%d  EC: realcol=%d",\
-			r,i,realr,c);\
-	trf_message("\nS=%d  Sleft=%d  Sdiag=%d  match=%d",\
-			S[r][i],S[r][i-1],S[r-1][upi-1],match(x[realr], y[c]));\
-	break;\
+    trf_message("\nget_pair_alignment_with_copynumber: error in trace back");\
+    trf_message("\nS: row=%d  column=%d  Sequence: realrow=%d  EC: realcol=%d",\
+            r,i,realr,c);\
+    trf_message("\nS=%d  Sleft=%d  Sdiag=%d  match=%d",\
+            S[r][i],S[r][i-1],S[r-1][upi-1],match(x[realr], y[c]));\
+    break;\
 }
 #define report_error_up_left \
 {\
-	trf_message("\nget_pair_alignment_with_copynumber: error in trace back");\
-	trf_message("\nS: row=%d  column=%d  Sequence: realrow=%d  EC: realcol=%d",\
-			r,i,realr,c);\
-	trf_message("\nS=%d  Sleft=%d  Sup=%d",\
-			S[r][i],S[r][i-1],S[r-1][upi]);\
-	break;\
+    trf_message("\nget_pair_alignment_with_copynumber: error in trace back");\
+    trf_message("\nS: row=%d  column=%d  Sequence: realrow=%d  EC: realcol=%d",\
+            r,i,realr,c);\
+    trf_message("\nS=%d  Sleft=%d  Sup=%d",\
+            S[r][i],S[r][i-1],S[r-1][upi]);\
+    break;\
 }
 #define report_error_left \
 {\
-	trf_message("\nget_pair_alignment_with_copynumber: error in trace back");\
-	trf_message("\nS: row=%d  column=%d  Sequence: realrow=%d  EC: realcol=%d",\
-			r,i,realr,c);\
-	trf_message("\nS=%d  Sleft=%d",\
-			S[r][i],S[r][i-1]);\
-	break;\
+    trf_message("\nget_pair_alignment_with_copynumber: error in trace back");\
+    trf_message("\nS: row=%d  column=%d  Sequence: realrow=%d  EC: realcol=%d",\
+            r,i,realr,c);\
+    trf_message("\nS=%d  Sleft=%d",\
+            S[r][i],S[r][i-1]);\
+    break;\
 }
 #define report_error_up \
 {\
-	trf_message("\nget_pair_alignment_with_copynumber: error in trace back");\
-	trf_message("\nfailed to go up when c=-1");\
-	trf_message("\nS: row=%d  column=%d  upi=%d  Sequence: realrow=%d  EC: realcol=%d",\
-			r,i,upi,realr,c);\
-	trf_message("\nS=%d  up=%d",\
-			S[r][i],S[r-1][upi]);\
-	break;\
+    trf_message("\nget_pair_alignment_with_copynumber: error in trace back");\
+    trf_message("\nfailed to go up when c=-1");\
+    trf_message("\nS: row=%d  column=%d  upi=%d  Sequence: realrow=%d  EC: realcol=%d",\
+            r,i,upi,realr,c);\
+    trf_message("\nS=%d  up=%d",\
+            S[r][i],S[r-1][upi]);\
+    break;\
 }
 {
 
@@ -1373,7 +1373,7 @@ else
             /* stop at r=0 for global */
             if (r == 0 || ((option == LOCAL) && (S[r][i] <= 0) && !legitimateZero)
                 || ((option == GLOBAL) && (r == 0) && (c == -1)))
-                //debug (uncomment to restore)  
+                //debug (uncomment to restore)
                 /*
                  * if (((option==LOCAL)&&(S[r][i]<=0))||((option==GLOBAL)&&(r==0)&&(c==-1)))
                  */
@@ -1565,7 +1565,7 @@ void shift_pattern_indices(int patternsize)
 
 void alt3_print_alignment(int patternwidth)
 {                               /* change added to make indices run
-                                 * from 1 to patternsize in the 
+                                 * from 1 to patternsize in the
                                  * output */
     /* prints out the alignment in AlignPair */
     extern int pwidth;
@@ -1635,10 +1635,10 @@ void alt3_print_alignment(int patternwidth)
             }
             fputc('\n', Fptxt);
             j = g;
-            fprintf(Fptxt, "  %9d ", AlignPair.indexsecnd[j] + 1);  /* +1 added to make 
-                                                                     * indices run from 
-                                                                     * 1 to 
-                                                                     * patternwidth in 
+            fprintf(Fptxt, "  %9d ", AlignPair.indexsecnd[j] + 1);  /* +1 added to make
+                                                                     * indices run from
+                                                                     * 1 to
+                                                                     * patternwidth in
                                                                      * output */
             first = TRUE;
             h = 0;
@@ -2063,7 +2063,7 @@ struct distancelist *new_distancelist()
     }
 
     /*
-     * 
+     *
      * for(g=1;g<=MAXDISTANCE;g++)
      * {
      * objptr[g].entry=(struct distanceentry *)
@@ -2071,7 +2071,7 @@ struct distancelist *new_distancelist()
      * }
      */
 
-    return (objptr);
+    return objptr;
 }
 
 void clear_distancelist(struct distancelist *objptr)
@@ -2249,9 +2249,9 @@ int no_matches_so_unlink_Distance(int d, int location, struct distancelist *objp
         /* once unlinked, we must also untag if it is a tag */
         untag_Distance_window(d, g);
 
-        return (1);
+        return 1;
     }
-    return (0);
+    return 0;
 }
 
 int GetTopPeriods(unsigned char *pattern, int length, int *toparray)
@@ -2411,9 +2411,9 @@ int multiples_criteria_4(int found_d)
     /* modified 5/23/05 G. Benson */
     for (g = 0; g < NUMBER_OF_PERIODS_TO_TEST; g++)
         if (found_d == topperiods[g])
-            return (TRUE);
+            return TRUE;
 
-    return (FALSE);
+    return FALSE;
 }
 
 /********************* new_meet_criteria_3 ***************************/
@@ -2460,7 +2460,7 @@ int new_meet_criteria_3(int d, int location, int tuplesize)
 
     /* does d meet all criteria? */
     if ((main_d_matches >= min_krun_matches) && (waiting_time_ok)) {
-        return (TRUE);
+        return TRUE;
     }
 
     /* no, so now look in the low range to see if d has most matches */
@@ -2499,7 +2499,7 @@ int new_meet_criteria_3(int d, int location, int tuplesize)
 
     /* stop if d not best */
     if (!d_still_best)
-        return (FALSE);
+        return FALSE;
 
     /* now check that d is best in upper range */
     t = main_d_info->linkup;
@@ -2515,11 +2515,11 @@ int new_meet_criteria_3(int d, int location, int tuplesize)
 
     /* stop if d not best */
     if (!d_still_best)
-        return (FALSE);
+        return FALSE;
 
     /* now test lowest range */
     if ((m >= min_krun_matches) && (waiting_time_ok)) {
-        return (TRUE);
+        return TRUE;
     }
 
     /* lower range didn't work, now test higher ranges */
@@ -2561,12 +2561,12 @@ int new_meet_criteria_3(int d, int location, int tuplesize)
 
         /* now test range */
         if ((m >= min_krun_matches) && (waiting_time_ok)) {
-            return (TRUE);
+            return TRUE;
         }
         t = s;
     }
 
-    return (FALSE);
+    return FALSE;
 }
 
 /****************************************************/
@@ -2966,10 +2966,10 @@ void get_statistics(int consensussize)
      * AlignPair.indexprime[1],best_match_distance,Copynumber,Classlength,
      * (int)(100*(float)match/x),(int)(100*(float)indel/x),AlignPair.score,
      * (int)(100*(double)ACGTcount['A'-'A']/count),
-     * (int)(100*(double)ACGTcount['C'-'A']/count), 
+     * (int)(100*(double)ACGTcount['C'-'A']/count),
      * (int)(100*(double)ACGTcount['G'-'A']/count),
      * (int)(100*(double)ACGTcount['T'-'A']/count),
-     * entropy); 
+     * entropy);
      */
 
     /* prints line showing the consensus pattern */
@@ -3813,9 +3813,9 @@ void newtupbo(void)
             if (j == Historysize[g])
                 j = 1;          /* we use a circular history list */
 
-            if ((History[g][j].location != 0)   /* if the next entry has 
+            if ((History[g][j].location != 0)   /* if the next entry has
                                                  * already been used */
-                &&(j == Tuplehash[g][History[g][j].code])) {    /* check Tuplehash.  
+                &&(j == Tuplehash[g][History[g][j].code])) {    /* check Tuplehash.
                                                                  * If it still */
                 /* points here, */
                 Tuplehash[g][History[g][j].code] = 0;   /* zero it out.   */
@@ -3830,12 +3830,12 @@ void newtupbo(void)
 
             yy = h;             /* yy holds entry which points to y */
             while (y != 0) {
-                d = i - History[g][y].location; /* d=distance between matching 
+                d = i - History[g][y].location; /* d=distance between matching
                                                  * tuples */
-                if (d > Tuplemaxdistance[g]) {  /* if d exceeds Tuplemaxdistance, 
+                if (d > Tuplemaxdistance[g]) {  /* if d exceeds Tuplemaxdistance,
                                                  * then */
                     /* make the previous location 0.  We */
-                    History[g][yy].previous = 0;    /* are no longer interested 
+                    History[g][yy].previous = 0;    /* are no longer interested
                                                      * in the y */
                     y = 0;      /* entry.  It will be zeroed out when */
                 }               /* reused */

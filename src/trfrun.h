@@ -311,9 +311,9 @@ void TRFControlRoutine(void)
     paramset.sequenceordinal = 1;
 
     /*********************************************************
-	 *   if there are more files need to produce sumary-style
-	 *   output.
-	 **********************************************************/
+     *   if there are more files need to produce sumary-style
+     *   output.
+     **********************************************************/
 
     /* generate the parameter string to be used in file names */
     sprintf(paramstring, "%d.%d.%d.%d.%d.%d.%d",
@@ -384,8 +384,8 @@ void TRFControlRoutine(void)
     }
 
     /******************************************
-	 *   process every sequence in file
-	 *******************************************/
+     *   process every sequence in file
+     *******************************************/
     i = 1;
     for (;;) {
 
@@ -822,11 +822,11 @@ void TRF(FASTASEQUENCE *pseq)
     }
 
     /****************************************************************
-	 * The following memory deallocations where not originally
-	 * implemented. There may still exist some marginal memory leaks
-	 * but due messy code structure and extensive use of macros and
-	 * global variables this could be impossible to fix.
-	 *****************************************************************/
+     * The following memory deallocations where not originally
+     * implemented. There may still exist some marginal memory leaks
+     * but due messy code structure and extensive use of macros and
+     * global variables this could be impossible to fix.
+     *****************************************************************/
 
     if (paramset.ngs != 1)
         PrintProgress("Freeing Memory...");

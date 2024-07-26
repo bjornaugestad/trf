@@ -43,7 +43,7 @@ License along with TRF.  If not, see <https://www.gnu.org/licenses/>.
  *   viii.   Delete old data file and make new one if option is
  *           set.
  *   ix.     Produce Masked file if option is set.
- *   x.      Free linked list memory. 
+ *   x.      Free linked list memory.
  *   Note that the sorting of elements is made to make the
  *   different activities optimal (i.e. removing redundancy and
  *   removing from alignment file.)
@@ -601,8 +601,8 @@ void BreakAlignments(IL *headptr, char *alignmentfile)
                 if (nextchar == 'F' || nextchar == 'D')
                     break;
 
-                // added check for NULL, Gelfand Dec 15, 2013 because of suspicion this may under 
-                // certain conditions enter an infinite loop. 
+                // added check for NULL, Gelfand Dec 15, 2013 because of suspicion this may under
+                // certain conditions enter an infinite loop.
                 if (NULL == fgets(buffer, 200, al_fp)) {
                     nextchar = 'D';
                     break;
